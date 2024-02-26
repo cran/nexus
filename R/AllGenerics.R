@@ -6,6 +6,12 @@ NULL
 setGeneric("dist", package = "stats")
 setGeneric("mahalanobis", package = "stats")
 
+# Import S4 generics ===========================================================
+#' @importMethodsFrom arkhe replace_NA
+#' @importMethodsFrom arkhe replace_zero
+#' @importMethodsFrom dimensio pca
+NULL
+
 # CoDa =========================================================================
 #' Coerce to a Closed Compositional Matrix
 #'
@@ -385,10 +391,10 @@ setGeneric(
 #'  the lowest possible dimension? This only works for extracting elements,
 #'  not for the replacement.
 #' @param ... Currently not used.
-#' @section Subcomposition:
-#'  If `drop` is `FALSE`, subsetting some of the possible components of a
-#'  [`CompositionMatrix-class`] object will produce a closed *subcomposition*
-#'  (see examples).
+# @section Subcomposition:
+#  If `drop` is `FALSE`, subsetting some of the possible components of a
+#  [`CompositionMatrix-class`] object will produce a closed *subcomposition*
+#  (see examples).
 #' @return
 #'  A subsetted object of the same sort as `x`.
 #' @example inst/examples/ex-subset.R
@@ -397,6 +403,25 @@ setGeneric(
 #' @family mutators
 #' @name subset
 #' @rdname subset
+NULL
+
+#' Divide into Groups
+#'
+#' Divides the compositional matrix `x` into the groups defined by `f`.
+#' @param x A [`CompositionMatrix-class`] object.
+#' @param f A 'factor' in the sense that [`as.factor(f)`][as.factor()] defines
+#'  the grouping, or a list of such factors in which case their interaction is
+#'  used for the grouping (see [base::split()]).
+#' @param drop A [`logical`] scalar: should levels that do not occur be dropped?
+#' @param ... Currently not used.
+#' @return
+#'  A `list` of [`CompositionMatrix-class`] objects.
+#' @example inst/examples/ex-split.R
+#' @author N. Frerebeau
+#' @docType methods
+#' @family mutators
+#' @name split
+#' @rdname split
 NULL
 
 # Log-Ratio ====================================================================
@@ -502,6 +527,7 @@ setGeneric(
 #'
 #' Computes ILR transformations.
 #' @param object A [`CompositionMatrix-class`] object.
+#' @param base A [`matrix`] giving the base of the transformation.
 #' @param ... Currently not used.
 #' @details
 #'  The ILR transformation provides the coordinates of any composition with
@@ -527,7 +553,7 @@ setGeneric(
 #' @aliases transform_ilr-method
 setGeneric(
   name = "transform_ilr",
-  def = function(object, ...) standardGeneric("transform_ilr"),
+  def = function(object, base, ...) standardGeneric("transform_ilr"),
   valueClass = "ILR"
 )
 
@@ -608,9 +634,13 @@ setGeneric(
 #' Splits the data into subsets, computes summary statistics for each, and
 #' returns the result.
 #' @param x A [`CompositionMatrix-class`] object.
-#' @param by A [`character`] string specifying the grouping element. It must be
-#'  one of "`samples`" or "`groups`". Any unambiguous substring can be given.
+#' @param by A vector or a list of grouping elements, each as long as the
+#'  variables in `x`. The elements are coerced to factors before use.
 #' @param FUN A [`function`] to compute the summary statistics.
+#' @param simplify A [`logical`] scalar: should the results be simplified to a
+#'  matrix if possible?
+#' @param drop A [`logical`] scalar indicating whether to drop unused
+#'  combinations of grouping values.
 #' @param ... Further arguments to be passed to `FUN`.
 #' @return A [`matrix`].
 #' @example inst/examples/ex-aggregate.R
@@ -638,6 +668,27 @@ NULL
 #' @family statistics
 #' @name mean
 #' @rdname mean
+NULL
+
+#' Sample Quantiles
+#'
+#' @param x A [`CompositionMatrix-class`] object.
+#' @param probs A [`numeric`] vector of probabilities with values in \eqn{[0,1]}.
+#' @param na.rm A [`logical`] scalar: should missing values be removed?
+#' @param names A [`logical`] scalar: should results be named?
+#' @param ... Currently not used.
+#' @return A [`numeric`] matrix.
+#' @references
+#'  Filzmoser, P., Hron, K. & Reimann, C. (2009). Univariate Statistical
+#'  Analysis of Environmental (Compositional) Data: Problems and Possibilities.
+#'  *Science of The Total Environment*, 407(23): 6100-6108.
+#'  \doi{10.1016/j.scitotenv.2009.08.008}.
+#' @example inst/examples/ex-mean.R
+#' @author N. Frerebeau
+#' @docType methods
+#' @family statistics
+#' @name quantile
+#' @rdname quantile
 NULL
 
 #' Marginal Compositions
@@ -873,6 +924,10 @@ NULL
 #' @param ann A [`logical`] scalar: should the default annotation (title and x
 #'  and y axis labels) appear on the plot?
 #' @param axes A [`logical`] scalar: should axes be drawn on the plot?
+#' @param col A vector of colors for the bar components.
+#' @param legend A [`list`] of additional arguments to be passed to
+#'  [graphics::legend()]; names of the list are used as argument names.
+#'  If `NULL`, no legend is displayed.
 #' @param ... Further parameters to be passed to [graphics::barplot()].
 #' @return
 #'  `barplot()` is called for its side-effects: is results in a graphic being
@@ -883,6 +938,40 @@ NULL
 #' @family plot methods
 #' @name barplot
 #' @rdname barplot
+NULL
+
+#' Histogram of Compositional Data
+#'
+#' Produces an histogram of univariate ILR data (see Filzmoser *et al.*, 2009).
+#' @param x A [`CompositionMatrix-class`] object.
+#' @param freq A [`logical`] scalar: should absolute frequencies (counts) be
+#'  displayed (see [graphics::hist()])?
+#' @param flip A [`logical`] scalar: should the y-axis (ticks and numbering) be
+#'  flipped from side 2 (left) to 4 (right) from variable to variable?
+#' @param ncol An [`integer`] specifying the number of columns to use when
+#'  `facet` is "`multiple`". Defaults to 1 for up to 4 series, otherwise to 2.
+#' @param main A [`character`] string giving a main title for the plot.
+#' @param sub A [`character`] string giving a subtitle for the plot.
+#' @param ann A [`logical`] scalar: should the default annotation (title and x
+#'  and y axis labels) appear on the plot?
+#' @param axes A [`logical`] scalar: should axes be drawn on the plot?
+#' @param frame.plot A [`logical`] scalar: should a box be drawn around the
+#'  plot?
+#' @param ... Further parameters to be passed to [graphics::hist()].
+#' @return
+#'  `hist()` is called for its side-effects: is results in a graphic being
+#'  displayed (invisibly return `x`).
+#' @references
+#'  Filzmoser, P., Hron, K. & Reimann, C. (2009). Univariate Statistical
+#'  Analysis of Environmental (Compositional) Data: Problems and Possibilities.
+#'  *Science of The Total Environment*, 407(23): 6100-6108.
+#'  \doi{10.1016/j.scitotenv.2009.08.008}.
+#' @example inst/examples/ex-hist.R
+#' @author N. Frerebeau
+#' @docType methods
+#' @family plot methods
+#' @name hist
+#' @rdname hist
 NULL
 
 #' Plot Compositional Data
@@ -1012,14 +1101,13 @@ NULL
 #'  transformations cannot be computed in the presence of missing values.
 #' @note
 #'  If you need more advanced features (e.g. imputation of missing values),
-#'  you should consider the [compositions][compositions::missingsInCompositions]
-#'  or [robCompositions][robCompositions::impCoda] package.
+#'  you should consider the \pkg{compositions} or \pkg{robCompositions} package.
 #' @references
 #'  Aitchison, J. (1986). *The Statistical Analysis of Compositional Data*.
 #'  London: Chapman and Hall.
 #' @family imputation methods
-#' @name policy
-#' @rdname policy
+#' @name missing
+#' @rdname missing
 NULL
 
 #' Zero-Replacement
@@ -1045,7 +1133,7 @@ NULL
 #' @author N. Frerebeau
 #' @docType methods
 #' @family imputation methods
-#' @name zero
+#' @name replace_zero
 #' @rdname replace_zero
 NULL
 
@@ -1066,7 +1154,7 @@ NULL
 #' @author N. Frerebeau
 #' @docType methods
 #' @family imputation methods
-#' @name missing
+#' @name replace_NA
 #' @rdname replace_NA
 NULL
 

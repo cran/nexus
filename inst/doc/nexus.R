@@ -1,4 +1,4 @@
-## ---- include = FALSE---------------------------------------------------------
+## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
@@ -106,8 +106,6 @@ barplot(coda, order = "Ca")
 clr <- transform_clr(coda)
 
 ## PCA
-library(dimensio)
-
 clr_pca <- pca(clr, scale = FALSE)
 
 viz_individuals(clr_pca, highlight = get_groups(coda), pch = 16, 

@@ -18,7 +18,9 @@
   main = NULL,
   sub = NULL,
   ann = graphics::par("ann"),
-  axes = TRUE
+  axes = TRUE,
+  col = grDevices::hcl.colors(ncol(height), "viridis"),
+  legend = list()
 )
 }
 \arguments{
@@ -50,6 +52,12 @@ horizontally with the first at the bottom.}
 and y axis labels) appear on the plot?}
 
 \item{axes}{A \code{\link{logical}} scalar: should axes be drawn on the plot?}
+
+\item{col}{A vector of colors for the bar components.}
+
+\item{legend}{A \code{\link{list}} of additional arguments to be passed to
+\code{\link[graphics:legend]{graphics::legend()}}; names of the list are used as argument names.
+If \code{NULL}, no legend is displayed.}
 }
 \value{
 \code{barplot()} is called for its side-effects: is results in a graphic being
@@ -73,12 +81,13 @@ data("kommos", package = "folio") # Coerce to compositional data
 kommos <- remove_NA(kommos, margin = 1) # Remove cases with missing values
 coda <- as_composition(kommos, groups = 1) # Use ceramic types for grouping
 
-barplot(coda, order = 1, main = "Kommos Ceramics")
-barplot(coda, order = 1, horiz = FALSE, main = "Kommos Ceramics")
+barplot(coda, order = 1)
+barplot(coda, order = 1, horiz = FALSE)
 }
 \seealso{
 Other plot methods: 
 \code{\link{as_graph}()},
+\code{\link{hist}()},
 \code{\link{plot_logratio}},
 \code{\link{plot}()}
 }

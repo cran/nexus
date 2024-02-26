@@ -5,9 +5,10 @@ bibentry(
   author       = c(person("Nicolas", "Frerebeau", role = "aut"),
                    person("Anne", "Philippe", role = "aut")),
   title        = "{nexus: Sourcing Archaeological Materials by Chemical Composition}",
-  year         = "2023",
+  year         = "2024",
   organization = "Université Bordeaux Montaigne",
   address      = "Pessac, France",
   note         = sprintf("R package version %s", meta$Version),
-  url          = "https://packages.tesselle.org/nexus/"
+  url          = "https://packages.tesselle.org/nexus/",
+  doi          = "10.5281/zenodo.10225630"
 )
