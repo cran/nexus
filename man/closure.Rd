@@ -10,9 +10,9 @@
 \usage{
 closure(x, ...)
 
-\S4method{closure}{numeric}(x, total = 1, na.rm = FALSE)
+\S4method{closure}{numeric}(x, total = 1, na.rm = TRUE)
 
-\S4method{closure}{matrix}(x, total = 1, na.rm = FALSE)
+\S4method{closure}{matrix}(x, total = 1, na.rm = TRUE)
 }
 \arguments{
 \item{x}{A \code{\link{numeric}} vector or matrix.}
@@ -28,7 +28,7 @@ compositions should be closed (defaults to 1).}
 A \code{\link{numeric}} vector or matrix (same as \code{x}).
 }
 \description{
-Closes compositions to sum up to 1.
+Closes compositions to sum to 1.
 }
 \examples{
 x <- as_composition(c(1, 2, 3))

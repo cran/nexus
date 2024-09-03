@@ -46,11 +46,7 @@ setClassUnion("index", members = c("logical", "numeric", "character"))
 #' An S4 class to represent compositional data.
 #' @slot totals A [`numeric`] vector to store the absolute row sums (before
 #'  the closure of the compositions).
-#' @slot codes A [`character`] vector to store the laboratory codes
-#'  (unique identifiers).
-#' @slot samples A [`character`] vector to store the sample identifiers
-#'  (allows duplicates in case of repeated measurements).
-#' @slot groups A [`character`] vector to store the group names (if any).
+#' @slot groups A [`factor`] vector to store the group names.
 #' @section Coerce:
 #'  In the code snippets below, `x` is a `CompositionMatrix` object.
 #'  \describe{
@@ -74,9 +70,7 @@ setClassUnion("index", members = c("logical", "numeric", "character"))
   Class = "CompositionMatrix",
   slots = c(
     totals = "numeric",
-    codes = "character",
-    samples = "character",
-    groups = "character"
+    groups = "factor"
   ),
   contains = c("NumericMatrix")
 )
@@ -87,12 +81,8 @@ setClassUnion("index", members = c("logical", "numeric", "character"))
 #' S4 classes to represent log-ratio data transformations.
 #' @slot totals A [`numeric`] vector to store the absolute row sums (before
 #'  the closure of the compositions).
-#' @slot codes A [`character`] vector to store the laboratory codes
-#'  (unique identifiers).
-#' @slot samples A [`character`] vector to store the sample identifiers
-#'  (allows duplicates in case of repeated measurements).
-#' @slot groups A [`character`] vector to store the group names (if any).
-#' @slot parts A [`character`] vector to store the part names.
+#' @slot groups A [`factor`] vector to store the group names.
+#' @slot parts A [`character`] vector to store the original part names.
 #' @slot ratio A [`character`] vector to store the ratio names.
 #' @slot order An [`integer`] vector to store the original ordering of the
 #'  columns.
@@ -117,9 +107,7 @@ setClassUnion("index", members = c("logical", "numeric", "character"))
   Class = "LogRatio",
   slots = c(
     totals = "numeric",
-    codes = "character",
-    samples = "character",
-    groups = "character",
+    groups = "factor",
 
     parts = "character",
     ratio = "character",
@@ -169,29 +157,20 @@ setClassUnion("index", members = c("logical", "numeric", "character"))
 #' Outliers
 #'
 #' An S4 class to store the result of outlier detection.
-#' @slot .Data A [`logical`] matrix.
-#' @slot codes A [`character`] vector to store the laboratory codes
-#'  (unique identifiers).
-#' @slot samples A [`character`] vector to store the sample identifiers
-#'  (allows duplicates in case of repeated measurements).
-#' @slot groups A [`character`] vector to store the group names (if any).
-#' @slot distances A [`numeric`] matrix giving the squared Mahalanobis distance.
-#' @slot limit A [`numeric`] value giving the cut-off value used for outlier
+#' @slot samples A [`character`] vector to store the sample identifiers.
+#' @slot groups A [`factor`] vector to store the group names.
+#' @slot standard A [`numeric`] matrix giving the standard squared Mahalanobis
+#'  distances.
+#' @slot robust A [`numeric`] matrix giving the robust squared Mahalanobis
+#'  distances.
+#' @slot limit A [`numeric`] value giving the cut-off value used for outliers
 #'  detection (quantile of the Chi-squared distribution).
-#' @slot robust An [`logical`] scalar: were robust estimators used?
 #' @slot dof A (non-negative) [`numeric`] value giving the degrees of freedom.
 #' @section Coerce:
 #'  In the code snippets below, `x` is an `OutlierIndex` object.
 #'  \describe{
 #'   \item{`as.data.frame(x)`}{Coerces to a [`data.frame`].}
 #'  }
-#' @section Subset:
-#'  In the code snippets below, `x` is an `OutlierIndex` object.
-#'  \describe{
-#'   \item{`x[[i]]`}{Extract a part of an object (see [`[[`][subset]).}
-#'  }
-#' @note
-#'  These classes inherit from [`logical`].
 #' @author N. Frerebeau
 #' @family classes
 #' @docType class
@@ -200,13 +179,11 @@ setClassUnion("index", members = c("logical", "numeric", "character"))
 .OutlierIndex <- setClass(
   Class = "OutlierIndex",
   slots = c(
-    codes = "character",
     samples = "character",
-    groups = "character",
-    distances = "matrix",
+    groups = "factor",
+    standard = "numeric",
+    robust = "numeric",
     limit = "numeric",
-    robust = "logical",
     dof = "integer"
-  ),
-  contains = "matrix"
+  )
 )

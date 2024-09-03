@@ -7,18 +7,18 @@
 \format{
 A \code{\link{data.frame}} with 5 variables (minerals):
 \describe{
-\item{A}{Albite (percent).}
-\item{B}{Blandite (percent).}
-\item{C}{Cornite (percent).}
-\item{D}{Daubite (percent).}
-\item{E}{Endite (percent).}
+\item{\code{A}}{Albite (weight percent).}
+\item{\code{B}}{Blandite (weight percent).}
+\item{\code{C}}{Cornite (weight percent).}
+\item{\code{D}}{Daubite (weight percent).}
+\item{\code{E}}{Endite (weight percent).}
 }
 }
 \usage{
 hongite
 }
 \description{
-Mineral compositions of 25 rock specimens of hongite type.
+Mineral compositions of 25 specimens of hongite.
 }
 \references{
 Aitchison, J. (1986). \emph{The Statistical Analysis of Compositional Data}.
@@ -27,8 +27,11 @@ London: Chapman and Hall.
 \seealso{
 Other datasets: 
 \code{\link{arctic}},
-\code{\link{chemistry}},
-\code{\link{petrography}},
+\code{\link{boxite}},
+\code{\link{coxite}},
+\code{\link{kongite}},
+\code{\link{lava}},
+\code{\link{predator}},
 \code{\link{slides}}
 }
 \concept{datasets}

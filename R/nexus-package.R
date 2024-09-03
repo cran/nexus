@@ -2,16 +2,13 @@
 #'  \tabular{ll}{
 #'   **Package:** \tab nexus \cr
 #'   **Type:** \tab Package \cr
-#'   **Version:** \tab 0.2.0 \cr
+#'   **Version:** \tab 0.3.0 \cr
 #'   **License:** \tab GPL-3 \cr
 #'   **Zenodo:** \tab \doi{10.5281/zenodo.10225630} \cr
 #'  }
 #'
 #' @section Package options:
 #'  `nexus` uses the following [options()] to configure behavior:
-#'  * `nexus.autodetect`: a [`logical`] scalar. Try to automatically assign
-#'    values to the corresponding slot of a `CompositionMatrix` object when
-#'    coercing a `data.frame`? Defaults to `TRUE`.
 #'  * `nexus.verbose`: a [`logical`] scalar. Should \R report extra information
 #'    on progress? Defaults to `TRUE`.
 #'
@@ -41,13 +38,12 @@
 "_PACKAGE"
 
 #' @import arkhe
-#' @importMethodsFrom isopleuros ternary_pairs
-#' @importFrom grDevices hcl.colors
-#' @importFrom methods as as<- callGeneric callNextMethod
-#'  .hasSlot initialize is new setClass setGeneric setMethod slot slot<-
+#' @importFrom isopleuros ternary_pairs
+#' @importFrom methods as as<- cbind2 callGeneric callNextMethod
+#'  .hasSlot initialize is new rbind2 setClass setGeneric setMethod slot slot<-
 #'  slotNames validObject .valueClassTest
 #' @importFrom MASS cov.rob
 #' @importFrom stats as.dist contr.helmert cov dist hclust mahalanobis ppoints
-#'  qchisq var
+#'  qchisq qqline qqplot var
 #' @importFrom utils combn tail
 NULL

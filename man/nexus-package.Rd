@@ -14,7 +14,7 @@ Exploration and analysis of compositional data in the framework of Aitchison (19
 \tabular{ll}{
 \strong{Package:} \tab nexus \cr
 \strong{Type:} \tab Package \cr
-\strong{Version:} \tab 0.2.0 \cr
+\strong{Version:} \tab 0.3.0 \cr
 \strong{License:} \tab GPL-3 \cr
 \strong{Zenodo:} \tab \doi{10.5281/zenodo.10225630} \cr
 }
@@ -23,9 +23,6 @@ Exploration and analysis of compositional data in the framework of Aitchison (19
 
 \code{nexus} uses the following \code{\link[=options]{options()}} to configure behavior:
 \itemize{
-\item \code{nexus.autodetect}: a \code{\link{logical}} scalar. Try to automatically assign
-values to the corresponding slot of a \code{CompositionMatrix} object when
-coercing a \code{data.frame}? Defaults to \code{TRUE}.
 \item \code{nexus.verbose}: a \code{\link{logical}} scalar. Should \R report extra information
 on progress? Defaults to \code{TRUE}.
 }

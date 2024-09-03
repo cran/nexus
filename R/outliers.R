@@ -4,191 +4,152 @@ NULL
 
 # Find =========================================================================
 #' @export
-#' @rdname outliers
-#' @aliases outliers,CompositionMatrix-method
+#' @rdname detect_outlier
+#' @aliases detect_outlier,CompositionMatrix,missing-method
 setMethod(
-  f = "outliers",
-  signature = c(object = "CompositionMatrix"),
-  definition = function(object, ..., groups = get_groups(object), robust = TRUE,
+  f = "detect_outlier",
+  signature = c(object = "CompositionMatrix", reference = "missing"),
+  definition = function(object, ..., robust = TRUE, method = c("mve", "mcd"),
+                        quantile = 0.975) {
+    methods::callGeneric(object, reference = object, robust = robust,
+                         method = method, quantile = quantile)
+  }
+)
+
+#' @export
+#' @rdname detect_outlier
+#' @aliases detect_outlier,CompositionMatrix,CompositionMatrix-method
+setMethod(
+  f = "detect_outlier",
+  signature = c(object = "CompositionMatrix", reference = "CompositionMatrix"),
+  definition = function(object, reference, ..., robust = TRUE,
                         method = c("mve", "mcd"), quantile = 0.975) {
+    ## Validation
+    if (!all(colnames(object) == colnames(reference))) {
+      stop("", call. = FALSE)
+    }
+
     ## Transformation
     z <- transform_ilr(object)
-
-    ## Grouping
-    m <- nrow(z)
-    p <- ncol(z)
-    if (is.null(groups) || all(is.na(groups))) {
-      grp <- list(all = z)
-      groups <- rep("all", m)
-    } else {
-      grp <- split(z, f = groups)
-    }
+    ref <- transform_ilr(reference)
 
     ## Clean
-    size <- vapply(X = grp, FUN = nrow, FUN.VALUE = integer(1), USE.NAMES = TRUE)
-    too_small <- size < p
-    if (any(too_small)) {
-      msg <- "%s is ignored: sample size is too small (%d).\n"
-      warning(sprintf(msg, names(grp)[too_small], size[too_small]), call. = FALSE)
+    n <- nrow(ref)
+    p <- ncol(ref)
+    if (n < (p + 1)) {
+      msg <- "Sample size is too small (%d)."
+      stop(sprintf(msg, n), call. = FALSE)
     }
-    if (all(too_small)) {
-      stop("Too few samples.", call. = FALSE)
+    if (n < (2 * p)) {
+      msg <- "Possibly too small sample size (%d)."
+      warning(sprintf(msg, n), call. = FALSE)
     }
-    grp <- grp[!too_small]
 
-    d2 <- matrix(data = NA_real_, nrow = m, ncol = length(grp))
-    dimnames(d2) <- list(rownames(object), names(grp))
+    ## Compute center and spread + Mahalanobis distance
+    ## Standard estimators
+    estc <- list(center = colMeans(ref, na.rm = TRUE), cov = cov(ref))
+    dc <- stats::mahalanobis(z, center = estc$center, cov = estc$cov)
 
-    ## For each group...
-    for (i in seq_along(grp)) {
-      ## ...subset
-      tmp <- grp[[i]]
-
-      ## ...compute center and spread
-      if (!robust) method <- "classical" # Standard estimators
-      else method <- match.arg(method, several.ok = FALSE) # Robust estimators
-      est <- MASS::cov.rob(tmp, method = method, ...)
-
-      ## Mahalanobis distance
-      d2[, i] <- stats::mahalanobis(z, center = est$center, cov = est$cov)
+    ## Robust estimators
+    dr <- rep(NA_real_, nrow(z))
+    if (robust) {
+      method <- match.arg(method, several.ok = FALSE)
+      estr <- MASS::cov.rob(ref, method = method, ...)
+      dr <- stats::mahalanobis(z, center = estr$center, cov = estr$cov)
     }
 
     ## Threshold
-    dof <- p - 1L
-    limit <- sqrt(stats::qchisq(p = quantile, df = dof))
-
-    d <- sqrt(d2)
-    out <- d > limit
+    limit <- sqrt(stats::qchisq(p = quantile, df = p))
 
     .OutlierIndex(
-      out,
-      codes = get_identifiers(object),
-      samples = get_samples(object),
-      groups = as.character(groups),
-      distances = d,
+      samples = rownames(z),
+      groups = groups(z),
+      standard = sqrt(dc),
+      robust = sqrt(dr),
       limit = limit,
-      robust = robust,
-      dof = dof
+      dof = p
     )
+  }
+)
+
+#' @export
+#' @rdname detect_outlier
+#' @aliases is_outlier,OutlierIndex-method
+setMethod(
+  f = "is_outlier",
+  signature = c("OutlierIndex"),
+  definition = function(object, robust = TRUE) {
+    d <- if (robust) object@robust else object@standard
+    out <- d > object@limit
+    names(out) <- object@samples
+    out
   }
 )
 
 # Plot =========================================================================
 #' @export
 #' @method plot OutlierIndex
-plot.OutlierIndex <- function(x, ..., qq = FALSE, probs = c(0.25, 0.75),
-                              ncol = NULL, flip = FALSE,
+plot.OutlierIndex <- function(x, ...,
+                              type = c("dotchart", "distance"),
+                              robust = TRUE,
+                              colors = color("discreterainbow"),
+                              symbols = c(16, 1, 3),
+                              xlim = NULL, ylim = NULL,
                               xlab = NULL, ylab = NULL,
                               main = NULL, sub = NULL,
                               ann = graphics::par("ann"),
                               axes = TRUE, frame.plot = axes,
-                              panel.first = NULL, panel.last = NULL) {
+                              panel.first = NULL, panel.last = NULL,
+                              legend = list(x = "topleft")) {
   ## Get data
-  d <- x@distances
-  g <- x@groups
-  k <- ncol(d)
+  dc <- x@standard
+  dr <- x@robust
+  grp <- x@groups
+  dof <- x@dof
+  limit <- x@limit
+  n <- length(dc)
 
-  ## Annotation
-  xlab <- xlab %||% ifelse(qq, "Theoretrical Quantiles", "Index")
-
-  if (k > 1) {
-    if (is.null(ncol)) ncol <- if (k > 4) 2 else 1
-    nrow <- ceiling(k / ncol)
-    ylabs <- ylab %||% colnames(d)
-
-    ## Graphical parameters
-    ## Save and restore
-    old_par <- graphics::par(
-      mar = c(0, 5.1, 0, if (flip) 5.1 else 2.1),
-      oma = c(6, 0, 5, 0),
-      mfcol = c(nrow, ncol)
-    )
-    on.exit(graphics::par(old_par))
-
-    cex.axis <- list(...)$cex.axis %||% graphics::par("cex.axis")
-    col.axis <- list(...)$col.axis %||% graphics::par("col.axis")
-    font.axis <- list(...)$font.axis %||% graphics::par("font.axis")
-    cex.lab <- list(...)$cex.lab %||% graphics::par("cex.lab")
-    col.lab <- list(...)$col.lab %||% graphics::par("col.lab")
-    font.lab <- list(...)$font.lab %||% graphics::par("font.lab")
-    cex.main <- list(...)$cex.main %||% graphics::par("cex.main")
-    font.main <- list(...)$font.main %||% graphics::par("font.main")
-    col.main <- list(...)$col.main %||% graphics::par("col.main")
-
-    ## Plot
-    for (j in seq_len(k)) {
-      dj <- d[, j, drop = TRUE]
-      gj <- g == colnames(d)[j]
-      .plot_outliers(dj, df = x@dof, qq = qq, qqline = gj,
-                     probs = probs, limit = x@limit,
-                     xlab = NULL, ylab = NULL, main = NULL, sub = NULL,
-                     ann = FALSE, axes = FALSE, frame.plot = frame.plot, ...)
-
-      ## Construct Axis
-      do_x <- (j %% nrow == 0 || j == k)
-      y_side <- if (j %% 2 || !flip) 2 else 4
-      if (axes) {
-        if (do_x) {
-          graphics::axis(side = 1, cex.axis = cex.axis, col.axis = col.axis,
-                         font.axis = font.axis, xpd = NA, las = 1)
-        }
-        graphics::axis(side = y_side, cex.axis = cex.axis, col.axis = col.axis,
-                       font.axis = font.axis, xpd = NA, las = 1)
-      }
-
-      ## Add annotation
-      if (ann) {
-        if (do_x) {
-          graphics::mtext(xlab, side = 1, line = 3, cex = cex.lab, col = col.lab,
-                          font = font.lab)
-        }
-        graphics::mtext(ylabs[[j]], side = y_side, line = 3, cex = cex.lab,
-                        col = col.lab, font = font.lab)
-      }
-    }
-
-    ## Add annotation
-    if (ann) {
-      graphics::par(mfcol = c(1, 1))
-      graphics::mtext(main, side = 3, line = 3, cex = cex.main, font = font.main,
-                      col = col.main)
-    }
-  } else {
-    rob <- ifelse(x@robust, "Robust", "Standard")
-    ylab <- ylab %||% sprintf("%s Mahalanobis distance", rob)
-
-    .plot_outliers(d[, 1], df = x@dof, qq = qq, qqline = g == colnames(d),
-                   limit = x@limit, probs = probs,
-                   xlab = xlab, ylab = ylab, main = main, sub = sub,
-                   ann = ann, axes = axes, frame.plot = frame.plot,
-                   panel.first = panel.first, panel.last = panel.last, ...)
+  ## Validation
+  if (all(is.na(dr))) {
+    robust <- FALSE
+    type <- "dotchart"
   }
+  type <- match.arg(type, several.ok = FALSE)
 
-  invisible(x)
-}
+  ## Graphical parameters
+  shape <- rep(symbols[[1L]], n)
+  if (robust || type == "distance") shape[dr > limit] <- symbols[[3L]]
+  if (!robust || type == "distance") shape[dc > limit] <- symbols[[2L]]
 
-#' @export
-#' @rdname plot_outliers
-#' @aliases plot,OutlierIndex,missing-method
-setMethod("plot", c(x = "OutlierIndex", y = "missing"), plot.OutlierIndex)
+  col <- rep("black", length(grp))
+  if (nlevels(grp) > 0) col <- khroma::palette_color_discrete(colors)(grp)
 
-.plot_outliers <- function(x, df, ..., qq = FALSE, qqline = seq_along(x),
-                           probs = c(0.25, 0.75), limit = NULL,
-                           col.group = "black", col.samples = "grey",
-                           pch.in = 16, pch.out = 1,
-                           xlab = NULL, ylab = NULL,
-                           main = NULL, sub = NULL,
-                           ann = graphics::par("ann"),
-                           axes = TRUE, frame.plot = axes,
-                           panel.first = NULL, panel.last = NULL) {
-  ## Prepare data
-  n <- length(x)
-  index <- seq_len(n)
+  cy <- if (robust) dr else dc
+  dlab <- sprintf("%s Mahalanobis distance", ifelse(robust, "Robust", "Standard"))
+  ylab <- ylab %||% dlab
 
-  khi <- stats::qchisq(stats::ppoints(n), df = df)
-  i <- if (qq) order(x) else index
-  data_x <- if (qq) khi else index
-  data_y <- x[i]
+  if (type == "dotchart") {
+    asp <- NA
+    cx <- seq_along(dc)
+    xlab <- xlab %||% "Index"
+    panel <- function() {
+      graphics::points(x = cx, y = cy, pch = shape, col = col)
+      graphics::abline(h = limit, lty = 1)
+    }
+  }
+  if (type == "distance") {
+    asp <- 1
+    cx <- dc
+    cy <- dr
+    xlab <- xlab %||% "Standard Mahalanobis distance"
+    ylab <- ylab %||% "Robust Mahalanobis distance"
+    panel <- function() {
+      graphics::points(x = cx, y = cy, pch = shape, col = col)
+      graphics::abline(h = limit, lty = 1)
+      graphics::abline(v = limit, lty = 1)
+      graphics::abline(a = 0, b = 1, lty = 2, col = "darkgrey")
+    }
+  }
 
   ## Open new window
   grDevices::dev.hold()
@@ -196,28 +157,15 @@ setMethod("plot", c(x = "OutlierIndex", y = "missing"), plot.OutlierIndex)
   graphics::plot.new()
 
   ## Set plotting coordinates
-  xlim <- range(data_x, na.rm = TRUE, finite = TRUE)
-  ylim <- range(data_y, na.rm = TRUE, finite = TRUE)
-  graphics::plot.window(xlim = xlim, ylim = ylim, asp = if (qq) 1 else NA)
+  xlim <- xlim %||% range(cx, finite = TRUE)
+  ylim <- ylim %||% range(cy, finite = TRUE)
+  graphics::plot.window(xlim = xlim, ylim = ylim, asp = asp)
 
   ## Evaluate pre-plot expressions
   panel.first
 
   ## Plot
-  col <- rep(col.samples, n)
-  col[qqline[i]] <- col.group
-  pch <- rep(pch.in, n)
-  pch[data_y > limit] <- pch.out
-
-  graphics::points(x = data_x, y = data_y, col = col, pch = pch, ...)
-  if (qq) {
-    stats::qqline(
-      y = data_y[qqline[i]],
-      distribution = function(p) stats::qchisq(p, df = df),
-      probs = probs, col = "#BB5566", ...
-    )
-  }
-  if (!qq && is.numeric(limit)) graphics::abline(h = limit, lty = 2)
+  panel()
 
   ## Evaluate post-plot and pre-axis expressions
   panel.last
@@ -238,5 +186,24 @@ setMethod("plot", c(x = "OutlierIndex", y = "missing"), plot.OutlierIndex)
     graphics::title(main = main, sub = sub, xlab = xlab, ylab = ylab)
   }
 
+  ## Add legend
+  if (is.list(legend)) {
+    if (type == "distance") {
+      lab <- c("No outlier", "Robust only", "Both")
+      pch <- symbols
+    } else {
+      lab <- c("No outlier", "Outlier")
+      pch <- symbols[-2 - !robust]
+    }
+    args <- list(x = "topleft", legend = lab, pch = pch, bty = "n", xpd = NA)
+    args <- utils::modifyList(args, legend)
+    do.call(graphics::legend, args = args)
+  }
+
   invisible(x)
 }
+
+#' @export
+#' @rdname plot_outlier
+#' @aliases plot,OutlierIndex,missing-method
+setMethod("plot", c(x = "OutlierIndex", y = "missing"), plot.OutlierIndex)

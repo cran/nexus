@@ -6,17 +6,32 @@
 \alias{plot,CompositionMatrix,missing-method}
 \title{Plot Compositional Data}
 \usage{
-\S4method{plot}{CompositionMatrix,missing}(x, ..., margin = NULL)
+\S4method{plot}{CompositionMatrix,missing}(
+  x,
+  ...,
+  by = groups(x),
+  margin = NULL,
+  color = palette_color_discrete(),
+  symbol = palette_shape()
+)
 }
 \arguments{
 \item{x}{A \code{\linkS4class{CompositionMatrix}} object.}
 
 \item{...}{Further \link[graphics:par]{graphical parameters}.}
 
+\item{by}{A \code{vector} of grouping elements, as long as the variables in \code{x}.}
+
 \item{margin}{A \code{\link{character}} string or an \code{\link{integer}} giving the index of
 the column to be used as the third part of the ternary plots. If \code{NULL}
 (the default), marginal compositions will be used (i.e. the geometric mean
 of the non-selected parts).}
+
+\item{color}{A palette \code{\link{function}} that when called with a single
+argument returns a \code{character} vector of colors.}
+
+\item{symbol}{A palette \code{\link{function}} that when called with a single
+argument returns a vector of symbols.}
 }
 \value{
 \code{plot()} is called for its side-effects: is results in a graphic being
@@ -26,14 +41,16 @@ displayed (invisibly return \code{x}).
 Displays a matrix of ternary plots.
 }
 \examples{
-## Data from Aitchison 1986
-data("hongite")
+## Data from Day et al. 2011
+data("kommos", package = "folio") # Coerce to compositional data
+kommos <- remove_NA(kommos, margin = 1) # Remove cases with missing values
+coda <- as_composition(kommos, parts = 3:8, groups = 1)
 
-## Coerce to compositional data
-coda <- as_composition(hongite)
-
-## Ternary plots
+## Use ceramic types for grouping
 plot(coda)
+
+## Center and scale ternary plots
+plot(coda, by = NULL, center = TRUE, scale = TRUE)
 }
 \seealso{
 \code{\link[isopleuros:ternary_pairs]{isopleuros::ternary_pairs()}}, \code{\link[isopleuros:ternary_plot]{isopleuros::ternary_plot()}}

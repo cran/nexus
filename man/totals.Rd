@@ -3,47 +3,47 @@
 \docType{methods}
 \name{totals}
 \alias{totals}
-\alias{get_totals}
-\alias{get_totals-method}
-\alias{set_totals<-}
-\alias{set_totals-method}
-\alias{get_totals,CompositionMatrix-method}
-\alias{set_totals<-,CompositionMatrix-method}
-\alias{set_totals,CompositionMatrix-method}
+\alias{totals-method}
+\alias{totals<-}
+\alias{totals,CompositionMatrix-method}
+\alias{totals,LogRatio-method}
+\alias{totals<-,CompositionMatrix-method}
 \title{Row Sums}
 \usage{
-get_totals(x)
+totals(object)
 
-set_totals(x) <- value
+totals(object) <- value
 
-\S4method{get_totals}{CompositionMatrix}(x)
+\S4method{totals}{CompositionMatrix}(object)
 
-\S4method{set_totals}{CompositionMatrix}(x) <- value
+\S4method{totals}{LogRatio}(object)
+
+\S4method{totals}{CompositionMatrix}(object) <- value
 }
 \arguments{
-\item{x}{An object from which to get or set \code{totals}.}
+\item{object}{An object from which to get or set \code{totals}.}
 
 \item{value}{A possible value for the \code{totals} of \code{x}.}
 }
 \value{
 \itemize{
-\item \code{set_totals()} returns an object of the same sort as \code{x} with the new
+\item \code{totals() <- value} returns an object of the same sort as \code{x} with the new
 row sums assigned.
-\item \code{get_totals()} returns the row sums of \code{x}.
+\item \code{totals()} returns the row sums of \code{x}.
 }
 }
 \description{
-Retrieves or defines the row sums (before closure).
+Retrieves or defines the row sums (before \link[=closure]{closure}).
 }
 \examples{
 ## Create a count matrix
-A1 <- matrix(data = as.numeric(sample(1:100, 100, TRUE)), nrow = 20)
+A1 <- matrix(data = sample(1:100, 100, TRUE), nrow = 20)
 
 ## Coerce to compositions
 B <- as_composition(A1)
 
 ## Row sums are internally stored before coercing to relative frequencies
-get_totals(B)
+totals(B)
 
 ## This allows to restore the source data
 A2 <- as_amounts(B)
@@ -54,11 +54,8 @@ head(X)
 }
 \seealso{
 Other mutators: 
-\code{\link{groups}},
-\code{\link{identifiers}},
-\code{\link{samples}},
-\code{\link{split}()},
-\code{\link{subset}()}
+\code{\link{groups}()},
+\code{\link{mutators}}
 }
 \author{
 N. Frerebeau

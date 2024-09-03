@@ -11,8 +11,6 @@
 \alias{[,CompositionMatrix,missing,index,logical-method}
 \alias{[,CompositionMatrix,index,index,missing-method}
 \alias{[,CompositionMatrix,index,index,logical-method}
-\alias{[[,OutlierIndex,index,ANY-method}
-\alias{[[,OutlierIndex-method}
 \alias{[<-,CompositionMatrix-method}
 \alias{[[<-,CompositionMatrix-method}
 \title{Extract or Replace Parts of an Object}
@@ -33,8 +31,6 @@
 
 \S4method{[}{CompositionMatrix,index,index,logical}(x, i, j, ..., drop = TRUE)
 
-\S4method{[[}{OutlierIndex,index,ANY}(x, i)
-
 \S4method{[}{CompositionMatrix}(x, i, j, ...) <- value
 
 \S4method{[[}{CompositionMatrix}(x, i, j, ...) <- value
@@ -54,7 +50,7 @@ dimension are selected.}
 
 \item{drop}{A \code{\link{logical}} scalar: should the result be coerced to
 the lowest possible dimension? This only works for extracting elements,
-not for the replacement.}
+not for the replacement. Defaults to \code{FALSE}.}
 
 \item{value}{A possible value for the element(s) of \code{x}.}
 }
@@ -76,21 +72,19 @@ head(coda)
 coda[[1, 1]] # Get the first value
 coda[1] # Get the first value
 coda[, ] # Get all values
-coda[1, , drop = FALSE] # Get the first row
+coda[1, ] # Get the first row
 
 ## Subcomposition
-subcoda <- coda[, 1:3, drop = FALSE] # Get the first three column
+subcoda <- coda[, 1:3] # Get the first three column
 head(subcoda)
 }
 \seealso{
-Other mutators: 
-\code{\link{groups}},
-\code{\link{identifiers}},
-\code{\link{samples}},
-\code{\link{split}()},
-\code{\link{totals}}
+Other subsetting methods: 
+\code{\link{bind}},
+\code{\link{extract}()},
+\code{\link{split}()}
 }
 \author{
 N. Frerebeau
 }
-\concept{mutators}
+\concept{subsetting methods}

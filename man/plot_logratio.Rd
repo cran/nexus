@@ -9,9 +9,8 @@
 \S4method{plot}{LogRatio,missing}(
   x,
   ...,
-  order = NULL,
-  decreasing = FALSE,
-  groups = get_groups(x),
+  by = groups(x),
+  color = palette_color_discrete(),
   rug = TRUE,
   ticksize = 0.05,
   ncol = NULL,
@@ -22,7 +21,7 @@
   ann = graphics::par("ann"),
   axes = TRUE,
   frame.plot = axes,
-  legend = list(x = "topright")
+  legend = list(x = "top")
 )
 }
 \arguments{
@@ -31,14 +30,11 @@
 \item{...}{Further \link[graphics:par]{graphical parameters}, particularly,
 \code{border} and \code{col}.}
 
-\item{order}{A \code{\link{logical}} scalar: should the ratio be ordered?}
+\item{by}{A \code{vector} of grouping elements, as long as the variables in
+\code{x}. If set, a matrix of panels defined by \code{groups} will be drawn.}
 
-\item{decreasing}{A \code{\link{logical}} scalar: should the sort order be increasing
-or decreasing?}
-
-\item{groups}{A \code{\link{factor}} in the sense that \code{\link[=as.factor]{as.factor(groups)}}
-defines the grouping. If set, a matrix of panels defined by \code{groups} will be
-drawn.}
+\item{color}{A palette \code{\link{function}} that when called with a single
+argument returns a \code{character} vector of colors.}
 
 \item{rug}{A \code{\link{logical}} scalar: should a \emph{rug} representation (1-d plot) of
 the data be added to the plot?}
@@ -47,8 +43,8 @@ the data be added to the plot?}
 ticks making up the \emph{rug}. Positive lengths give inwards ticks. Only used if
 \code{rug} is \code{TRUE}.}
 
-\item{ncol}{An \code{\link{integer}} specifying the number of columns to use when
-\code{facet} is "\code{multiple}". Defaults to 1 for up to 4 series, otherwise to 2.}
+\item{ncol}{An \code{\link{integer}} specifying the number of columns to use.
+Defaults to 1 for up to 4 groups, otherwise to 2.}
 
 \item{flip}{A \code{\link{logical}} scalar: should the y-axis (ticks and numbering) be
 flipped from side 2 (left) to 4 (right) from variable to variable?}
@@ -80,11 +76,15 @@ Displays a density plot.
 ## Data from Day et al. 2011
 data("kommos", package = "folio") # Coerce to compositional data
 kommos <- remove_NA(kommos, margin = 1) # Remove cases with missing values
-coda <- as_composition(kommos, groups = 1) # Use ceramic types for grouping
+coda <- as_composition(kommos, groups = 1)
 
 ## Log ratio
 clr <- transform_clr(coda)
-plot(clr, group = NULL, flip = TRUE, border = "black", col = NA)
+
+## Density plot
+plot(clr, by = NULL, flip = TRUE)
+
+## Use ceramic types for grouping
 plot(clr, flip = TRUE)
 }
 \seealso{

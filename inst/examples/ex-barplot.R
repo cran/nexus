@@ -5,12 +5,15 @@ data("hongite")
 coda <- as_composition(hongite)
 
 ## Bar plot
-barplot(coda, order = 2)
+barplot(coda)
 
 ## Data from Day et al. 2011
-data("kommos", package = "folio") # Coerce to compositional data
+data("kommos", package = "folio")
 kommos <- remove_NA(kommos, margin = 1) # Remove cases with missing values
-coda <- as_composition(kommos, groups = 1) # Use ceramic types for grouping
+coda <- as_composition(kommos, groups = 1) # Coerce to compositional data
 
-barplot(coda, order = 1)
-barplot(coda, order = 1, horiz = FALSE)
+## Use ceramic types for grouping
+barplot(coda, order_columns = TRUE)
+
+## Display only minor elements
+barplot(coda, select = is_element_minor(coda), order_columns = TRUE)

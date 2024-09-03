@@ -3,7 +3,6 @@
 NULL
 
 # Extract ======================================================================
-## CompositionMatrix -----------------------------------------------------------
 .subscript1 <- function(x, i) {
   x@.Data[i]
 }
@@ -12,10 +11,8 @@ NULL
   ## Rows
   if (missing(i)) i <- seq_len(nrow(x))
   if (is.character(i)) i <- match(i, dimnames(x)[1L])
-  codes <- x@codes[i]
-  samples <- x@samples[i]
-  groups <- x@groups[i]
-  totals <- x@totals[i]
+  totals <- totals(x)[i]
+  groups <- groups(x)[i]
 
   ## Columns
   if (missing(j)) j <- seq_len(ncol(x))
@@ -31,8 +28,7 @@ NULL
   #   z <- z / tot
   # }
 
-  methods::initialize(x, z, codes = codes, samples = samples, groups = groups,
-                      totals = totals)
+  methods::initialize(x, z, totals = totals, groups = groups)
 }
 
 wrong_dimensions <- function(i, j) {
@@ -40,6 +36,7 @@ wrong_dimensions <- function(i, j) {
   stop(msg, call. = FALSE)
 }
 
+## CompositionMatrix -----------------------------------------------------------
 #' @export
 #' @rdname subset
 #' @aliases [,CompositionMatrix,missing,missing,missing-method
@@ -84,7 +81,8 @@ setMethod(
       return(x) # x[i=]
     }
     if (na == 3L) {
-      x <- .subscript2(x, i, , drop = TRUE)
+      #/!\ DROP /!\
+      x <- .subscript2(x, i, , drop = FALSE)
       return(x) # x[i=, ], x[, i=]
     }
     wrong_dimensions("i", ".") # x[i=, , ], etc.
@@ -124,7 +122,8 @@ setMethod(
       return(x)
     }
     if (na == 3L) {
-      x <- .subscript2(x, , j, drop = TRUE) # x[j=, ], x[, j=]
+      # /!\ DROP /!\
+      x <- .subscript2(x, , j, drop = FALSE) # x[j=, ], x[, j=]
       return(x)
     }
     wrong_dimensions(".", "j") # x[, j=, ], etc.
@@ -160,7 +159,8 @@ setMethod(
   definition = function(x, i, j, ..., drop) {
     na <- nargs()
     if (na == 3L) {
-      x <- .subscript2(x, i, j, drop = TRUE) # x[i=, j=], x[j=, i=]
+      # /!\ DROP /!\
+      x <- .subscript2(x, i, j, drop = FALSE) # x[i=, j=], x[j=, i=]
       return(x)
     }
     wrong_dimensions("i", "j") # x[i=, j=, ], etc.
@@ -180,23 +180,6 @@ setMethod(
       return(x)
     }
     wrong_dimensions("i", "j") # x[i=, j=, , drop=], etc.
-  }
-)
-
-## OutlierIndex ----------------------------------------------------------------
-#' @export
-#' @rdname subset
-#' @aliases [[,OutlierIndex-method
-setMethod(
-  f = "[[",
-  signature = c(x = "OutlierIndex", i = "index"),
-  function(x, i) {
-    arkhe::assert_length(i, 1)
-
-    mtx <- x[, i, drop = FALSE]
-    d <- x@distances[, i, drop = FALSE]
-
-    initialize(x, mtx, distances = d)
   }
 )
 
@@ -226,5 +209,28 @@ setMethod(
     z <- methods::callNextMethod()
     methods::validObject(z)
     z
+  }
+)
+
+# Transpose ====================================================================
+#' @export
+#' @rdname t
+#' @aliases t,CompositionMatrix-method
+setMethod(
+  f = "t",
+  signature = c(x = "CompositionMatrix"),
+  function(x) {
+    t(x@.Data)
+  }
+)
+
+#' @export
+#' @rdname t
+#' @aliases t,LogRatio-method
+setMethod(
+  f = "t",
+  signature = c(x = "LogRatio"),
+  function(x) {
+    t(x@.Data)
   }
 )

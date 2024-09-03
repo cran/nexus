@@ -9,7 +9,7 @@ NULL
 setMethod(
   f = "closure",
   signature = c(x = "numeric"),
-  definition = function(x, total = 1, na.rm = FALSE) {
+  definition = function(x, total = 1, na.rm = TRUE) {
     x * total / sum(x, na.rm = na.rm)
   }
 )
@@ -20,7 +20,7 @@ setMethod(
 setMethod(
   f = "closure",
   signature = c(x = "matrix"),
-  definition = function(x, total = 1, na.rm = FALSE) {
+  definition = function(x, total = 1, na.rm = TRUE) {
     x * total / rowSums(x, na.rm = na.rm)
   }
 )
@@ -40,9 +40,7 @@ setMethod(
 
     z <- x * y
     z <- as_composition(z)
-
-    set_samples(z) <- get_samples(x)
-    set_groups(z) <- get_groups(x)
+    groups(z) <- groups(x)
 
     z
   }
@@ -94,8 +92,7 @@ setMethod(
     arkhe::assert_length(y, 1L)
     z <- x ^ y
     z <- as_composition(z)
-    set_samples(z) <- get_samples(x)
-    set_groups(z) <- get_groups(x)
+    groups(z) <- groups(x)
     z
   }
 )
@@ -167,7 +164,7 @@ setMethod(
 
     z <- numeric(m)
     for (i in seq_len(m)) {
-      z[i] <- scalar(x[i, ], y[i, ])
+      z[i] <- scalar(x[i, , drop = TRUE], y[i, , drop = TRUE])
     }
     z
   }
@@ -201,8 +198,8 @@ aitchison <- function(x, diag = FALSE, upper = FALSE) {
     x = seq_len(m),
     m = 2,
     FUN = function(i, coda) {
-      x <- coda[i[1], ]
-      y <- coda[i[2], ]
+      x <- coda[i[1], , drop = TRUE]
+      y <- coda[i[2], , drop = TRUE]
       norm(x / y)
     },
     coda = x

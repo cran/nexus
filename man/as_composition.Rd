@@ -17,10 +17,8 @@ as_composition(from, ...)
 
 \S4method{as_composition}{data.frame}(
   from,
-  codes = NULL,
-  samples = NULL,
+  parts = NULL,
   groups = NULL,
-  auto = getOption("nexus.autodetect"),
   verbose = getOption("nexus.verbose")
 )
 }
@@ -29,18 +27,12 @@ as_composition(from, ...)
 
 \item{...}{Currently not used.}
 
-\item{codes}{An \code{\link{integer}} giving the index of the column to be used as
-laboratory codes (unique identifiers).}
-
-\item{samples}{An \code{\link{integer}} giving the index of the column to be used for
-sample identification: allows duplicates to identify replicated measurements.
-If \code{NULL} (the default), row names will be used as sample IDs.}
+\item{parts}{A \code{vector} giving the index of the column to be used a
+compositional parts. If \code{NULL} (the default), all \code{\link{double}} columns will be
+used.}
 
 \item{groups}{An \code{\link{integer}} giving the index of the column to be used to
 group the samples. If \code{NULL} (the default), no grouping is stored.}
-
-\item{auto}{A \code{\link{logical}} scalar: try to automatically detect \code{codes},
-\code{samples} and \code{groups} columns?}
 
 \item{verbose}{A \code{\link{logical}} scalar: should \R report extra information
 on progress?}
@@ -52,33 +44,17 @@ A \code{\linkS4class{CompositionMatrix}} object.
 Coerces an object to a \code{CompositionMatrix} object.
 }
 \details{
-The \code{\linkS4class{CompositionMatrix}} class has special slots:
-\itemize{
-\item \code{codes} for \link[=identifiers]{laboratory codes},
-\item \code{samples} for \link[=samples]{repeated measurements/observation},
-\item \code{groups} to \link[=group]{group data by site/area}.
-}
-
-When coercing a \code{data.frame} to a \code{\linkS4class{CompositionMatrix}} object, an
-attempt is made to automatically assign values to these slots by mapping
-column names (case insensitive, plural insensitive). This behavior can be
-disabled by setting \code{options(nexus.autodetect = FALSE)} or overridden by
-explicitly specifying the columns to be used.
-
 See \code{vignette("nexus")}.
-}
-\note{
-All non-numeric variable will be removed.
 }
 \examples{
 ## Create a count matrix
-A1 <- matrix(data = as.numeric(sample(1:100, 100, TRUE)), nrow = 20)
+A1 <- matrix(data = sample(1:100, 100, TRUE), nrow = 20)
 
 ## Coerce to compositions
 B <- as_composition(A1)
 
 ## Row sums are internally stored before coercing to relative frequencies
-get_totals(B)
+totals(B)
 
 ## This allows to restore the source data
 A2 <- as_amounts(B)
@@ -89,8 +65,7 @@ head(X)
 }
 \seealso{
 Other compositional data tools: 
-\code{\link{as_amounts}()},
-\code{\link{as_features}()}
+\code{\link{as_amounts}()}
 }
 \author{
 N. Frerebeau

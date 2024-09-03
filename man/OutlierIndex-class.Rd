@@ -11,42 +11,27 @@ An S4 class to store the result of outlier detection.
 \section{Slots}{
 
 \describe{
-\item{\code{.Data}}{A \code{\link{logical}} matrix.}
+\item{\code{samples}}{A \code{\link{character}} vector to store the sample identifiers.}
 
-\item{\code{codes}}{A \code{\link{character}} vector to store the laboratory codes
-(unique identifiers).}
+\item{\code{groups}}{A \code{\link{factor}} vector to store the group names.}
 
-\item{\code{samples}}{A \code{\link{character}} vector to store the sample identifiers
-(allows duplicates in case of repeated measurements).}
+\item{\code{standard}}{A \code{\link{numeric}} matrix giving the standard squared Mahalanobis
+distances.}
 
-\item{\code{groups}}{A \code{\link{character}} vector to store the group names (if any).}
+\item{\code{robust}}{A \code{\link{numeric}} matrix giving the robust squared Mahalanobis
+distances.}
 
-\item{\code{distances}}{A \code{\link{numeric}} matrix giving the squared Mahalanobis distance.}
-
-\item{\code{limit}}{A \code{\link{numeric}} value giving the cut-off value used for outlier
+\item{\code{limit}}{A \code{\link{numeric}} value giving the cut-off value used for outliers
 detection (quantile of the Chi-squared distribution).}
-
-\item{\code{robust}}{An \code{\link{logical}} scalar: were robust estimators used?}
 
 \item{\code{dof}}{A (non-negative) \code{\link{numeric}} value giving the degrees of freedom.}
 }}
 
-\note{
-These classes inherit from \code{\link{logical}}.
-}
 \section{Coerce}{
 
 In the code snippets below, \code{x} is an \code{OutlierIndex} object.
 \describe{
 \item{\code{as.data.frame(x)}}{Coerces to a \code{\link{data.frame}}.}
-}
-}
-
-\section{Subset}{
-
-In the code snippets below, \code{x} is an \code{OutlierIndex} object.
-\describe{
-\item{\code{x[[i]]}}{Extract a part of an object (see \code{\link[=subset]{[[}}).}
 }
 }
 

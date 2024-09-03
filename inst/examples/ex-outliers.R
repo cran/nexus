@@ -1,16 +1,15 @@
 ## Data from Day et al. 2011
 data("kommos", package = "folio") # Coerce to compositional data
 kommos <- remove_NA(kommos, margin = 1) # Remove cases with missing values
-coda <- as_composition(kommos, groups = 1) # Use ceramic types for grouping
+coda <- as_composition(kommos, parts = 3:17, groups = 1)
 
 ## Detect outliers
-out <- outliers(coda, groups = NULL, robust = FALSE)
+out <- detect_outlier(coda)
 
-plot(out) # Plot
-plot(out, qq = TRUE) # Quantile-Quantile plot
+plot(out, type = "dotchart")
+plot(out, type = "distance")
 
-## Detect outliers by group
-out <- outliers(coda[, 1:15, drop = FALSE])
-
-plot(out, ncol = 2) # Plot
-plot(out, qq = TRUE, ncol = 4) # Quantile-Quantile plot
+## Detect outliers according to CJ
+ref <- extract(coda, "CJ")
+out <- detect_outlier(coda, reference = ref, method = "mcd")
+plot(out, type = "dotchart")

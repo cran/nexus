@@ -10,33 +10,38 @@ if (at_home()) {
   coda <- as_composition(hongite)
 
   # Plot =======================================================================
-  plot_pairs <- function() plot(coda, order = NULL)
+  plot_pairs <- function() plot(coda)
   expect_snapshot_plot(plot_pairs, "plot_pairs")
+
+  plot_pairs <- function() plot(coda, by = rep(1:5, 5))
+  expect_snapshot_plot(plot_pairs, "plot_pairs_group")
 
   # Histogram ==================================================================
   plot_hist <- function() hist(coda, ncol = 3)
   expect_snapshot_plot(plot_hist, "plot_hist")
 
   # Barplot ====================================================================
-  plot_barplot <- function() barplot(coda, order = NULL)
+  plot_barplot <- function() barplot(coda, by = NULL, order_columns = FALSE, border = "black")
   expect_snapshot_plot(plot_barplot, "plot_barplot")
 
-  plot_barplot_order <- function() barplot(coda, order = 2)
-  expect_snapshot_plot(plot_barplot_order, "plot_barplot_order")
+  plot_barplot_order <- function() barplot(coda, order_columns = TRUE, border = "black")
+  expect_snapshot_plot(plot_barplot_order, "plot_barplot_order_columns")
 
-  set_groups(coda) <- rep(1:5, 5)
-  plot_barplot_group <- function() barplot(coda, order = 2)
+  plot_barplot_order <- function() barplot(coda, order_rows = 2, border = "black")
+  expect_snapshot_plot(plot_barplot_order, "plot_barplot_order_rows")
+
+  plot_barplot_group <- function() barplot(coda, by = rep(1:5, 5), order_columns = TRUE, border = "black")
   expect_snapshot_plot(plot_barplot_group, "plot_barplot_group")
 
-  plot_barplot_vertical <- function() barplot(coda, order = NULL, horiz = FALSE)
-  expect_snapshot_plot(plot_barplot_vertical, "plot_barplot_vertical")
+  # Density ====================================================================
+  # See argument old.coords of density().
+  if (getRversion() >= "4.4.0") {
+    ilr <- transform_ilr(coda)
 
-  # Scatterplot ================================================================
-  # clr <- transform_clr(coda)
-  #
-  # plot_ratio <- function() plot(clr, order = NULL, groups = NULL)
-  # expect_snapshot_plot(plot_ratio, "plot_ratio")
-  #
-  # plot_ratio_group <- function() plot(clr, order = NULL)
-  # expect_snapshot_plot(plot_ratio_group, "plot_ratio_group")
+    plot_ratio <- function() plot(ilr, by = NULL, ncol = 2)
+    expect_snapshot_plot(plot_ratio, "plot_ratio")
+
+    plot_ratio <- function() plot(ilr, by = rep(1:5, 5), ncol = 2)
+    expect_snapshot_plot(plot_ratio, "plot_ratio_group")
+  }
 }
