@@ -1,3 +1,20 @@
+# nexus 0.4.0
+## New classes and methods
+* Add `ReferenceGroups`, `GroupedComposition` and `GroupedLogRatio` classes to represent grouped data.
+* Add `group()`, `ungroup()`, `group_levels()`, `group_names()`, `group_indices()`, `group_rows()`, `group_length()`, `group_size()`, `group_extract()`, `group_split()` and `is_grouped()` to work with grouped data.
+* Add `transform_lr()`, `transform_clr()`, `transform_alr()`, `transform_ilr()`, `transform_plr()` and `transform_inverse()` methods for `GroupedComposition` and `GroupedLogRatio` objects.
+* Add `is_composition()`, `is_logratio()` and `is_grouped()` to check if an object is from a specific class.
+* Add `pairs()` to display a matrix of ternary plots.
+
+## Enhancements
+* `as_composition()` gained a new `autodetect` argument to enable/disable automatic detection of numeric variables.
+
+## Breaking changes
+* Redesign the internal mechanism for grouping data.
+* `hist()` now produces a single histogram.
+* `plot(<LogRatio>)` produces a scatter plot instead of a density plot.
+* Rename the `plot()` method for the `CompositionMatrix` class to `pairs()`.
+
 # nexus 0.3.0
 ## New classes and methods
 * Add transformation methods for `LogRatio` objects (clr <-> alr, clr -> ilr, alr -> ilr).

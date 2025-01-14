@@ -19,10 +19,12 @@ NULL
 #' Coerces an object to a `CompositionMatrix` object.
 #' @param from A [`matrix`] or [`data.frame`] to be coerced.
 #' @param parts A `vector` giving the index of the column to be used a
-#'  compositional parts. If `NULL` (the default), all [`double`] columns will be
-#'  used.
+#'  compositional parts. If `NULL` and `autodetect` is `TRUE` (the default),
+#'  all `numeric` columns will be used.
 #' @param groups An [`integer`] giving the index of the column to be used to
 #'  group the samples. If `NULL` (the default), no grouping is stored.
+#' @param autodetect A [`logical`] scalar: should `numeric` variables be
+#'  automatically used as compositional parts?
 #' @param verbose A [`logical`] scalar: should \R report extra information
 #'  on progress?
 #' @param ... Currently not used.
@@ -183,6 +185,52 @@ setGeneric(
 )
 
 # Extract ======================================================================
+## Subset ----------------------------------------------------------------------
+#' Extract or Replace Parts of an Object
+#'
+#' Operators acting on objects to extract or replace parts.
+#' @param x An object from which to extract element(s) or in which to replace
+#'  element(s).
+#' @param i,j Indices specifying elements to extract or replace. Indices are
+#'  [`numeric`], [`integer`] or [`character`] vectors or empty (missing) or
+#'  `NULL`. Numeric values are coerced to [`integer`] as by [as.integer()].
+#'  Character vectors will be matched to the name of the elements.
+#'  An empty index (a comma separated blank) indicates that all entries in that
+#'  dimension are selected.
+#' @param value A possible value for the element(s) of `x`.
+#' @param drop A [`logical`] scalar: should the result be coerced to
+#'  the lowest possible dimension? This only works for extracting elements,
+#'  not for the replacement. Defaults to `FALSE`.
+#' @param ... Currently not used.
+# @section Subcomposition:
+#  If `drop` is `FALSE`, subsetting some of the possible components of a
+#  [`CompositionMatrix-class`] object will produce a closed *subcomposition*
+#  (see examples).
+#' @return
+#'  A subsetted object of the same sort as `x`.
+#' @example inst/examples/ex-subset.R
+#' @author N. Frerebeau
+#' @docType methods
+#' @family subsetting methods
+#' @name subset
+#' @rdname subset
+NULL
+
+#' Combine Two Composition Matrices
+#'
+#' @param x,y A [`CompositionMatrix-class`] object.
+#' @details
+#'  `rbind2()` combine by rows.
+#' @return
+#'  A [`CompositionMatrix-class`] objects.
+#' @example inst/examples/ex-split.R
+#' @author N. Frerebeau
+#' @docType methods
+#' @family subsetting methods
+#' @name bind
+#' @rdname bind
+NULL
+
 ## Mutators --------------------------------------------------------------------
 #' Get or Set Parts of an Object
 #'
@@ -224,53 +272,192 @@ setGeneric(
   def = function(object, value) standardGeneric("totals<-")
 )
 
-#' Working With Groups
+#' Coerce to a Data Frame
 #'
-#' Retrieves or defines the (reference) groups to which the observations belong.
-#' @param object An object from which to get or set `groups`.
-#' @param value A possible value for the `groups` of `x` (typically, a
-#'  [`character`] vector).
-#'  If `value` is a [`list`], [`interaction(value)`][interaction()] defines the
-#'  grouping.
-#' @details
-#'  Missing values (`NA`) or empty strings (`""`) can be used to specify that a
-#'  sample does not belong to any group.
+#' @param x An \R object (typically, a [`CompositionMatrix-class`] object).
+#' @param row.names A [`character`] vector giving the row names for the data
+#'  frame, or `NULL`.
+#' @param optional A [`logical`] scalar: should the names of the variables in
+#'  the data frame be checked? If `FALSE` then the names of the variables in the
+#'  data frame are checked to ensure that they are syntactically valid variable
+#'  names and are not duplicated.
+#' @param group_var A [`character`] string specifying the name of the column to
+#'  create for group attribution.
+#' @param ... Currently not used.
 #' @return
-#'  * `groups() <- value` returns an object of the same sort as `x` with the new
-#'    group names assigned.
-#'  * `groups()` returns a [`character`] vector giving the group names of `x`.
-#'  * `any_assigned()` returns a [`logical`] scalar specifying whether or not
-#'    `x` has groups.
-#'  * `is_assigned()` returns a [`logical`] vector specifying whether or not an
-#'    observation belongs to a group.
-#' @example inst/examples/ex-groups.R
+#'  A [`data.frame`].
+#' @example inst/examples/ex-coerce.R
 #' @author N. Frerebeau
 #' @docType methods
 #' @family mutators
-#' @aliases groups-method
+#' @name as.data.frame
+#' @rdname as.data.frame
+NULL
+
+#' Matrix Transpose
+#'
+#' @param x A [`CompositionMatrix-class`] object.
+#' @return
+#'  A `matrix`, with dim and dimnames constructed appropriately from those of `x`.
+#' @note
+#'  Implemented only to ensure that `t()` always returns a base `matrix`.
+#' @example inst/examples/ex-subset.R
+#' @author N. Frerebeau
+#' @docType methods
+# @family mutators
+#' @keywords internal
+#' @name t
+#' @rdname t
+NULL
+
+# Groups =======================================================================
+#' Working With Groups
+#'
+#' Define or remove the (reference) groups to which the observations belong.
+#' @param object An \R object (typically, a [`CompositionMatrix-class`] object).
+#' @param by A possible value for the groups of `object` (typically, a
+#'  [`character`] vector). If `value` is a [`list`],
+#'  [`interaction(by)`][interaction()] defines the grouping.
+#' @param add A [`logical`] scalar. If `TRUE`, add to existing groups.
+#' @param verbose A [`logical`] scalar: should \R report extra information
+#'  on progress?
+#' @param ... Further parameters to be passed to internal methods.
+#' @details
+#'  Missing values (`NA`) can be used to specify that a sample does not belong
+#'  to any group.
+#' @return
+#'  * `group()` returns a grouped object of the same sort as `object`.
+#'  * `ungroup()` returns an ungrouped object of the same sort as `object`.
+#' @example inst/examples/ex-group.R
+#' @author N. Frerebeau
+#' @docType methods
+#' @family grouping methods
+#' @aliases group-method
 setGeneric(
-  name = "groups",
-  def = function(object) standardGeneric("groups")
+  name = "group",
+  def = function(object, ...) standardGeneric("group")
 )
 
-#' @rdname groups
+#' @rdname group
 setGeneric(
-  name = "groups<-",
-  def = function(object, value) standardGeneric("groups<-")
+  name = "ungroup",
+  def = function(object, ...) standardGeneric("ungroup")
 )
 
-#' @rdname groups
+#' Grouping Metadata
+#'
+#' Retrieve the (reference) groups to which the observations belong.
+#' @param object A [grouped][group()] \R object.
+#' @example inst/examples/ex-group.R
+#' @author N. Frerebeau
+#' @docType methods
+#' @family grouping methods
+#' @name group_metadata
+#' @rdname group_metadata
+NULL
+
+#' @rdname group_metadata
+#' @aliases group_levels-method
+setGeneric(
+  name = "group_levels",
+  def = function(object) standardGeneric("group_levels")
+)
+
+#' @rdname group_metadata
+#' @aliases group_names-method
+setGeneric(
+  name = "group_names",
+  def = function(object) standardGeneric("group_names")
+)
+
+#' @rdname group_metadata
+#' @aliases group_rows-method
+setGeneric(
+  name = "group_rows",
+  def = function(object) standardGeneric("group_rows")
+)
+
+#' @rdname group_metadata
+#' @aliases group_length-method
+setGeneric(
+  name = "group_length",
+  def = function(object) standardGeneric("group_length")
+)
+
+#' @rdname group_metadata
+#' @aliases group_size-method
+setGeneric(
+  name = "group_size",
+  def = function(object) standardGeneric("group_size")
+)
+
+#' @rdname group_metadata
+#' @aliases group_indices-method
+setGeneric(
+  name = "group_indices",
+  def = function(object) standardGeneric("group_indices")
+)
+
+#' @rdname group_metadata
+#' @aliases is_assigned-method
+setGeneric(
+  name = "is_assigned",
+  def = function(object) standardGeneric("is_assigned")
+)
+
+#' @rdname group_metadata
 #' @aliases any_assigned-method
 setGeneric(
   name = "any_assigned",
   def = function(object) standardGeneric("any_assigned")
 )
 
-#' @rdname groups
-#' @aliases is_assigned-method
+#' @rdname group_metadata
+#' @aliases any_assigned-method
 setGeneric(
-  name = "is_assigned",
-  def = function(object) standardGeneric("is_assigned")
+  name = "all_assigned",
+  def = function(object) standardGeneric("all_assigned")
+)
+
+#' Divide into Groups
+#'
+#' Divides a compositional matrix by groups.
+#' @param object,x A [`CompositionMatrix-class`] object.
+#' @param by A `vector` or a list of grouping elements, each as long as the
+#'  variables in `object` (see [group()]).
+#' @param f A 'factor' in the sense that [`as.factor(f)`][as.factor()] defines
+#'  the grouping, or a list of such factors in which case their interaction is
+#'  used for the grouping (see [base::split()]).
+#' @param drop A [`logical`] scalar: should levels that do not occur be dropped?
+#' @param ... Currently not used.
+#' @return
+#'  A `list` of [`CompositionMatrix-class`] objects.
+#' @example inst/examples/ex-split.R
+#' @author N. Frerebeau
+#' @docType methods
+#' @family grouping methods
+#' @aliases group_split-method
+setGeneric(
+  name = "group_split",
+  def = function(object, ...) standardGeneric("group_split")
+)
+
+#' Group-based Subset
+#'
+#' @param object A [`GroupedComposition-class`] object.
+#' @param which A [`character`] vector specifying the [groups][group()] of
+#'  `object` to extract.
+#' @param ... Currently not used.
+#' @return
+#'  A [`CompositionMatrix-class`] object.
+#' @example inst/examples/ex-group.R
+#' @author N. Frerebeau
+#' @docType methods
+#' @family grouping methods
+#' @aliases group_extract-method
+setGeneric(
+  name = "group_extract",
+  def = function(object, ...) standardGeneric("group_extract")
 )
 
 # Tools ========================================================================
@@ -338,105 +525,6 @@ setGeneric(
   def = function(object, ...) standardGeneric("is_oxide"),
   valueClass = "logical"
 )
-
-## Subset ----------------------------------------------------------------------
-#' Extract or Replace Parts of an Object
-#'
-#' Operators acting on objects to extract or replace parts.
-#' @param x An object from which to extract element(s) or in which to replace
-#'  element(s).
-#' @param i,j Indices specifying elements to extract or replace. Indices are
-#'  [`numeric`], [`integer`] or [`character`] vectors or empty (missing) or
-#'  `NULL`. Numeric values are coerced to [`integer`] as by [as.integer()].
-#'  Character vectors will be matched to the name of the elements.
-#'  An empty index (a comma separated blank) indicates that all entries in that
-#'  dimension are selected.
-#' @param value A possible value for the element(s) of `x`.
-#' @param drop A [`logical`] scalar: should the result be coerced to
-#'  the lowest possible dimension? This only works for extracting elements,
-#'  not for the replacement. Defaults to `FALSE`.
-#' @param ... Currently not used.
-# @section Subcomposition:
-#  If `drop` is `FALSE`, subsetting some of the possible components of a
-#  [`CompositionMatrix-class`] object will produce a closed *subcomposition*
-#  (see examples).
-#' @return
-#'  A subsetted object of the same sort as `x`.
-#' @example inst/examples/ex-subset.R
-#' @author N. Frerebeau
-#' @docType methods
-#' @family subsetting methods
-#' @name subset
-#' @rdname subset
-NULL
-
-#' Group-based Subset
-#'
-#' @param object A [`CompositionMatrix-class`] object.
-#' @param name A [`character`] vector specifying the [group][groups()] of
-#'  `object` to extract.
-#' @param ... Currently not used.
-#' @return
-#'  A [`CompositionMatrix-class`] object.
-#' @example inst/examples/ex-groups.R
-#' @author N. Frerebeau
-#' @docType methods
-#' @family subsetting methods
-#' @aliases extract-method
-setGeneric(
-  name = "extract",
-  def = function(object, ...) standardGeneric("extract")
-)
-
-#' Divide into Groups
-#'
-#' Divides the compositional matrix `x` into the groups defined by `f`.
-#' @param x A [`CompositionMatrix-class`] object.
-#' @param f A 'factor' in the sense that [`as.factor(f)`][as.factor()] defines
-#'  the grouping, or a list of such factors in which case their interaction is
-#'  used for the grouping (see [base::split()]).
-#' @param drop A [`logical`] scalar: should levels that do not occur be dropped?
-#' @param ... Currently not used.
-#' @return
-#'  A `list` of [`CompositionMatrix-class`] objects.
-#' @example inst/examples/ex-split.R
-#' @author N. Frerebeau
-#' @docType methods
-#' @family subsetting methods
-#' @name split
-#' @rdname split
-NULL
-
-#' Combine Two Composition Matrices
-#'
-#' @param x,y A [`CompositionMatrix-class`] object.
-#' @details
-#'  `rbind2()` combine by rows.
-#' @return
-#'  A [`CompositionMatrix-class`] objects.
-#' @example inst/examples/ex-split.R
-#' @author N. Frerebeau
-#' @docType methods
-#' @family subsetting methods
-#' @name bind
-#' @rdname bind
-NULL
-
-#' Matrix Transpose
-#'
-#' @param x A [`CompositionMatrix-class`] object.
-#' @return
-#'  A `matrix`, with dim and dimnames constructed appropriately from those of `x`.
-#' @note
-#'  Implemented only to ensure that `t()` always returns a base `matrix`.
-#' @example inst/examples/ex-subset.R
-#' @author N. Frerebeau
-#' @docType methods
-# @family mutators
-#' @keywords internal
-#' @name t
-#' @rdname t
-NULL
 
 # Log-Ratio ====================================================================
 ## LR --------------------------------------------------------------------------
@@ -690,8 +778,7 @@ setGeneric(
 #' returns the result.
 #' @param x A [`CompositionMatrix-class`] object.
 #' @param by A `vector` or a list of grouping elements, each as long as the
-#'  variables in `x`. The elements are coerced to factors before use
-#'  (in the sense that [`interaction(by)`][interaction()] defines the grouping).
+#'  variables in `x` (see [group()]).
 #' @param FUN A [`function`] to compute the summary statistics.
 #' @param simplify A [`logical`] scalar: should the results be simplified to a
 #'  matrix if possible?
@@ -751,8 +838,9 @@ NULL
 #' Splits the data into subsets and computes compositional mean for each.
 #' @param x A [`CompositionMatrix-class`] object.
 #' @param by A `vector` or a list of grouping elements, each as long as the
-#'  variables in `x`. The elements are coerced to factors before use
-#'  (in the sense that [`interaction(by)`][interaction()] defines the grouping).
+#'  variables in `x` (see [group()]).
+#' @param verbose A [`logical`] scalar: should \R report extra information
+#'  on progress?
 #' @param ... Further arguments to be passed to [mean()].
 #' @return A [`CompositionMatrix-class`] object.
 #' @seealso [mean()], [aggregate()]
@@ -1038,9 +1126,6 @@ NULL
 #'
 #' Displays a compositional bar chart.
 #' @param height A [`CompositionMatrix-class`] object.
-#' @param select A vector of column indices.
-#' @param by A `vector` of grouping elements, as long as the variables in
-#'  `height`.
 #' @param order_columns A [`logical`] scalar: should should columns be reorderd?
 #' @param order_rows An [`integer`] vector giving the index of the column to be
 #'  used for the ordering of the data.
@@ -1052,12 +1137,12 @@ NULL
 #' @param offset A length-one [`numeric`] vector giving the the amount of space
 #'  (as a fraction) left between groups (defaults to \eqn{0.025}). Only used if
 #'  `groups` is not `NULL`.
-#' @param color A palette [`function`] that when called with a single
+#' @param palette_color A palette [`function`] that when called with a single
 #'  argument returns a `character` vector of colors.
 #' @param border The color to draw the borders.
 #' @param axes A [`logical`] scalar: should axes be drawn on the plot?
 #' @param legend A [`logical`] scalar: should the legend be displayed?
-#' @param ... Further parameters to be passed to [graphics::barplot()].
+#' @param ... Further graphical parameters.
 #' @return
 #'  `barplot()` is called for its side-effects: is results in a graphic being
 #'  displayed (invisibly return `height`).
@@ -1074,13 +1159,15 @@ NULL
 #'
 #' Produces an histogram of univariate ILR data (see Filzmoser *et al.*, 2009).
 #' @param x A [`CompositionMatrix-class`] object.
+#' @param select A length-one `vector` of column indices.
+#' @param breaks An object specifying how to compute the breakpoints
+#'  (see [graphics::hist()]).
 #' @param freq A [`logical`] scalar: should absolute frequencies (counts) be
 #'  displayed? If `FALSE` (the default), relative frequencies (probabilities)
 #'  are displayed (see [graphics::hist()]).
-#' @param flip A [`logical`] scalar: should the y-axis (ticks and numbering) be
-#'  flipped from side 2 (left) to 4 (right) from variable to variable?
-#' @param ncol An [`integer`] specifying the number of columns to use.
-#'  Defaults to 1 for up to 4 parts, otherwise to 2.
+#' @param labels A [`logical`] scalar: should labels be drawn on top of bars?
+#'  If `TRUE`, draw the counts or rounded densities; if `labels` is a
+#'  `character` vector, draw itself.
 #' @param main A [`character`] string giving a main title for the plot.
 #' @param sub A [`character`] string giving a subtitle for the plot.
 #' @param ann A [`logical`] scalar: should the default annotation (title and x
@@ -1088,7 +1175,7 @@ NULL
 #' @param axes A [`logical`] scalar: should axes be drawn on the plot?
 #' @param frame.plot A [`logical`] scalar: should a box be drawn around the
 #'  plot?
-#' @param ... Further parameters to be passed to [graphics::hist()].
+#' @param ... Further graphical parameters.
 #' @return
 #'  `hist()` is called for its side-effects: is results in a graphic being
 #'  displayed (invisibly return `x`).
@@ -1110,44 +1197,39 @@ NULL
 #'
 #' Displays a matrix of ternary plots.
 #' @param x A [`CompositionMatrix-class`] object.
-#' @param by A `vector` of grouping elements, as long as the variables in `x`.
-#' @param color A palette [`function`] that when called with a single
+#' @param palette_color A palette [`function`] that when called with a single
 #'  argument returns a `character` vector of colors.
-#' @param symbol A palette [`function`] that when called with a single
+#' @param palette_symbol A palette [`function`] that when called with a single
 #'  argument returns a vector of symbols.
 #' @inheritParams isopleuros::ternary_pairs
 #' @return
 #'  `plot()` is called for its side-effects: is results in a graphic being
 #'  displayed (invisibly return `x`).
 #' @seealso [isopleuros::ternary_pairs()], [isopleuros::ternary_plot()]
-#' @example inst/examples/ex-plot.R
+#' @example inst/examples/ex-pairs.R
 #' @author N. Frerebeau
 #' @docType methods
 #' @family plot methods
-#' @name plot
-#' @rdname plot
+#' @name pairs
+#' @rdname pairs
 NULL
 
 ## Density ---------------------------------------------------------------------
 #' Plot Log-Ratios
 #'
-#' Displays a density plot.
+#' Displays a scatter plot.
 #' @param x A [`LogRatio-class`] object.
-#' @param by A `vector` of grouping elements, as long as the variables in
-#'  `x`. If set, a matrix of panels defined by `groups` will be drawn.
-#' @param color A palette [`function`] that when called with a single
-#'  argument returns a `character` vector of colors.
-#' @param rug A [`logical`] scalar: should a *rug* representation (1-d plot) of
-#'  the data be added to the plot?
-#' @param ticksize A length-one [`numeric`] vector giving the length of the
-#'  ticks making up the *rug*. Positive lengths give inwards ticks. Only used if
-#'  `rug` is `TRUE`.
-#' @param flip A [`logical`] scalar: should the y-axis (ticks and numbering) be
-#'  flipped from side 2 (left) to 4 (right) from variable to variable?
-#' @param ncol An [`integer`] specifying the number of columns to use.
-#'  Defaults to 1 for up to 4 groups, otherwise to 2.
+#' @param factor,amount A length-one [`numeric`] vector specifying the amount of
+#'  jitter (see [jitter()]).
+#' @param palette_color A palette [`function`] that when called with a single
+#'  argument returns a `character` vector of colors (only used if `x`
+#'  [is grouped][group()]).
+#' @param palette_symbol A palette [`function`] that when called with a single
+#'  argument returns a vector of symbols (only used if `x`
+#'  [is grouped][group()]).
 #' @param xlab,ylab A [`character`] vector giving the x and y axis labels.
 #' @param main A [`character`] string giving a main title for the plot.
+#' @param sub A [`character`] string giving a subtitle for the plot.
 #' @param ann A [`logical`] scalar: should the default annotation (title and x
 #'  and y axis labels) appear on the plot?
 #' @param axes A [`logical`] scalar: should axes be drawn on the plot?
@@ -1156,17 +1238,16 @@ NULL
 #' @param legend A [`list`] of additional arguments to be passed to
 #'  [graphics::legend()]; names of the list are used as argument names.
 #'  If `NULL`, no legend is displayed.
-#' @param ... Further [graphical parameters][graphics::par()], particularly,
-#'  `border` and `col`.
+#' @param ... Further graphical parameters.
 #' @return
 #'  `plot()` is called for its side-effects: is results in a graphic being
 #'  displayed (invisibly return `x`).
-#' @example inst/examples/ex-density.R
+#' @example inst/examples/ex-plot.R
 #' @author N. Frerebeau
 #' @docType methods
 #' @family plot methods
-#' @name plot_logratio
-#' @rdname plot_logratio
+#' @name plot
+#' @rdname plot
 NULL
 
 ## Graph -----------------------------------------------------------------------
@@ -1381,9 +1462,6 @@ setGeneric(
 #'  Any unambiguous substring can be given.
 #' @param robust A [`logical`] scalar: should robust Mahalanobis distances be
 #'  displayed? Only used if `type` is "`dotchart`".
-#' @param colors A vector of colors or a `function` that when called with a
-#'  single argument (an integer specifying the number of colors) returns a
-#'  vector of colors. Will be mapped to the group names.
 #' @param symbols A lenth-three vector of symbol specification for non-outliers
 #'  and outliers (resp.).
 #' @param xlim A length-two [`numeric`] vector giving the x limits of the plot.
@@ -1408,7 +1486,7 @@ setGeneric(
 #' @param legend A [`list`] of additional arguments to be passed to
 #'  [graphics::legend()]; names of the list are used as argument names.
 #'  If `NULL`, no legend is displayed.
-#' @param ... Further [graphical parameters][graphics::par()].
+#' @param ... Further parameters to be passed to [graphics::points()].
 #' @return
 #'  `plot()` is called for its side-effects: is results in a graphic being
 #'  displayed (invisibly return `x`).

@@ -40,7 +40,12 @@ setMethod(
 
     z <- x * y
     z <- as_composition(z)
-    groups(z) <- groups(x)
+    rownames(z) <- rownames(x)
+
+    if (is_grouped(x)) {
+      x@group_indices <- group_indices(x)
+      x@group_levels <- group_levels(x)
+    }
 
     z
   }
@@ -90,9 +95,16 @@ setMethod(
   signature = c(x = "CompositionMatrix", y = "numeric"),
   definition = function(x, y) {
     arkhe::assert_length(y, 1L)
+
     z <- x ^ y
     z <- as_composition(z)
-    groups(z) <- groups(x)
+    rownames(z) <- rownames(x)
+
+    if (is_grouped(x)) {
+      x@group_indices <- group_indices(x)
+      x@group_levels <- group_levels(x)
+    }
+
     z
   }
 )

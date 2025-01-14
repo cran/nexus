@@ -4,14 +4,30 @@ NULL
 
 # Not exported
 get_transformation <- function(x) {
-  switch(
-    class(x),
-    LR = "Pairwise Log-Ratio",
-    CLR = "Centered Log-Ratio",
-    ALR = "Additive Log-Ratio",
-    ILR = "Isometric Log-Ratio",
-    PLR = "Pivot Log-Ratio"
-  )
+  if (methods::is(x, "LR")) return("Pairwise Log-Ratio")
+  if (methods::is(x, "CLR")) return("Centered Log-Ratio")
+  if (methods::is(x, "ALR")) return("Additive Log-Ratio")
+  if (methods::is(x, "ILR")) return("Isometric Log-Ratio")
+  if (methods::is(x, "PLR")) return("Pivot Log-Ratio")
+}
+
+# Predicates ===================================================================
+#' @export
+#' @rdname CompositionMatrix-class
+is_composition <- function(object) {
+  methods::is(object, "CompositionMatrix")
+}
+
+#' @export
+#' @rdname LogRatio-class
+is_logratio <- function(object) {
+  methods::is(object, "LogRatio")
+}
+
+#' @export
+#' @rdname ReferenceGroups-class
+is_grouped <- function(object) {
+  methods::is(object, "ReferenceGroups")
 }
 
 # Getter =======================================================================

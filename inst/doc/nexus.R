@@ -39,21 +39,6 @@ X <- data.frame(
 ## (the 'type' column will be removed)
 Y <- as_composition(X)
 
-## -----------------------------------------------------------------------------
-## Data from Wood and Liu 2023
-data("bronze", package = "folio")
-
-## Use the third column (dynasties) for grouping
-coda <- as_composition(bronze, groups = 3)
-
-## ----barplot, fig.width=7, fig.height=7, out.width='100%'---------------------
-## Compositional bar plot
-barplot(coda, select = is_element_major(coda), order_rows = "Cu", space = 0)
-
-## ----mean, eval=FALSE---------------------------------------------------------
-#  ## Compositional mean by artefact
-#  coda <- condense(coda, by = list(bronze$dynasty, bronze$reference))
-
 ## ----transform, fig.width=7, fig.height=8, out.width='100%'-------------------
 ## CLR
 clr <- transform_clr(coda)
@@ -62,46 +47,4 @@ clr <- transform_clr(coda)
 back <- transform_inverse(clr)
 
 all.equal(back, coda)
-
-## -----------------------------------------------------------------------------
-## Assume that about a third of the samples does not belong to any group
-grp <- groups(coda)
-grp[sample(length(grp), size = 100)] <- NA
-
-## Set groups
-groups(coda) <- grp
-
-## Retrieve groups
-# groups(coda)
-
-## ----pca, fig.width=7, fig.height=7, out.width='50%', fig.show='hold'---------
-## CLR
-clr <- transform_clr(coda, weights = TRUE)
-
-## PCA
-lra <- pca(clr)
-
-## Visualize results
-viz_individuals(lra, color = c("#004488", "#DDAA33", "#BB5566"))
-viz_hull(x = lra, border = c("#004488", "#DDAA33", "#BB5566"))
-
-viz_variables(lra)
-
-## ----manova-------------------------------------------------------------------
-## ILR
-ilr <- transform_ilr(coda)
-
-bronze$ilr <- ilr
-
-## MANOVA
-fit <- manova(ilr ~ groups(ilr), data = bronze)
-summary(fit)
-
-## ----lda, fig.width=7, fig.height=7, out.width='100%'-------------------------
-## LDA
-discr <- MASS::lda(groups(ilr) ~ ilr, data = bronze)
-plot(discr)
-
-## Back transform results
-transform_inverse(discr$means, origin = ilr)
 

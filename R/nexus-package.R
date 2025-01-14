@@ -2,15 +2,15 @@
 #'  \tabular{ll}{
 #'   **Package:** \tab nexus \cr
 #'   **Type:** \tab Package \cr
-#'   **Version:** \tab 0.3.0 \cr
+#'   **Version:** \tab 0.4.0 \cr
 #'   **License:** \tab GPL-3 \cr
 #'   **Zenodo:** \tab \doi{10.5281/zenodo.10225630} \cr
 #'  }
 #'
 #' @section Package options:
-#'  `nexus` uses the following [options()] to configure behavior:
+#'  \pkg{nexus} uses the following [options()] to configure behavior:
 #'  * `nexus.verbose`: a [`logical`] scalar. Should \R report extra information
-#'    on progress? Defaults to `TRUE`.
+#'    on progress? Defaults to [interactive()].
 #'
 #' @author
 #'  **Full list of authors and contributors** (alphabetic order)

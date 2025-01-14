@@ -9,14 +9,12 @@
 \S4method{barplot}{CompositionMatrix}(
   height,
   ...,
-  select = NULL,
-  by = groups(height),
   order_columns = FALSE,
   order_rows = NULL,
   decreasing = TRUE,
   space = 0.2,
   offset = 0.025,
-  color = palette_color_discrete(),
+  palette_color = palette_color_discrete(),
   border = NA,
   axes = TRUE,
   legend = TRUE
@@ -25,12 +23,7 @@
 \arguments{
 \item{height}{A \code{\linkS4class{CompositionMatrix}} object.}
 
-\item{...}{Further parameters to be passed to \code{\link[graphics:barplot]{graphics::barplot()}}.}
-
-\item{select}{A vector of column indices.}
-
-\item{by}{A \code{vector} of grouping elements, as long as the variables in
-\code{height}.}
+\item{...}{Further graphical parameters.}
 
 \item{order_columns}{A \code{\link{logical}} scalar: should should columns be reorderd?}
 
@@ -48,7 +41,7 @@ increasing or decreasing?}
 (as a fraction) left between groups (defaults to \eqn{0.025}). Only used if
 \code{groups} is not \code{NULL}.}
 
-\item{color}{A palette \code{\link{function}} that when called with a single
+\item{palette_color}{A palette \code{\link{function}} that when called with a single
 argument returns a \code{character} vector of colors.}
 
 \item{border}{The color to draw the borders.}
@@ -83,14 +76,15 @@ coda <- as_composition(kommos, groups = 1) # Coerce to compositional data
 barplot(coda, order_columns = TRUE)
 
 ## Display only minor elements
-barplot(coda, select = is_element_minor(coda), order_columns = TRUE)
+minor <- coda[, is_element_minor(coda)]
+barplot(minor, order_columns = TRUE)
 }
 \seealso{
 Other plot methods: 
 \code{\link{as_graph}()},
 \code{\link{hist}()},
-\code{\link{plot}()},
-\code{\link{plot_logratio}}
+\code{\link{pairs}()},
+\code{\link{plot}()}
 }
 \author{
 N. Frerebeau

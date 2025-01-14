@@ -14,17 +14,17 @@ Exploration and analysis of compositional data in the framework of Aitchison (19
 \tabular{ll}{
 \strong{Package:} \tab nexus \cr
 \strong{Type:} \tab Package \cr
-\strong{Version:} \tab 0.3.0 \cr
+\strong{Version:} \tab 0.4.0 \cr
 \strong{License:} \tab GPL-3 \cr
 \strong{Zenodo:} \tab \doi{10.5281/zenodo.10225630} \cr
 }
 }
 \section{Package options}{
 
-\code{nexus} uses the following \code{\link[=options]{options()}} to configure behavior:
+\pkg{nexus} uses the following \code{\link[=options]{options()}} to configure behavior:
 \itemize{
 \item \code{nexus.verbose}: a \code{\link{logical}} scalar. Should \R report extra information
-on progress? Defaults to \code{TRUE}.
+on progress? Defaults to \code{\link[=interactive]{interactive()}}.
 }
 }
 

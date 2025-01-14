@@ -65,10 +65,10 @@ companion package to **nexus** that allows to create ternary plots.
 
 To cite nexus in publications use:
 
-Frerebeau N, Philippe A (2024). *nexus: Sourcing Archaeological
+Frerebeau N, Philippe A (2025). *nexus: Sourcing Archaeological
 Materials by Chemical Composition*. Université Bordeaux Montaigne,
 Pessac, France. <doi:10.5281/zenodo.10225630>
-<https://doi.org/10.5281/zenodo.10225630>, R package version 0.3.0,
+<https://doi.org/10.5281/zenodo.10225630>, R package version 0.4.0,
 <https://packages.tesselle.org/nexus/>.
 
 This package is a part of the tesselle project
@@ -119,13 +119,15 @@ data("bronze", package = "folio")
 coda <- as_composition(bronze, parts = 4:11)
 
 ## Use dynasties as groups
-groups(coda) <- bronze$dynasty
+coda <- group(coda, by = bronze$dynasty)
 ```
 
 ``` r
-## Compositional barplots of major elements
-barplot(coda, select = is_element_major(coda), order_rows = "Cu",
-        border = NA, space = 0)
+## Select major elements
+major <- coda[, is_element_major(coda)]
+
+## Compositional barplot
+barplot(major, order_rows = "Cu", border = NA, space = 0)
 ```
 
 ![](man/figures/README-barplot-1.png)<!-- -->
@@ -137,8 +139,12 @@ clr <- transform_clr(coda, weights = TRUE)
 lra <- pca(clr)
 
 ## Visualize results
-viz_individuals(lra, color = c("#004488", "#DDAA33", "#BB5566"))
-viz_hull(x = lra, border = c("#004488", "#DDAA33", "#BB5566"))
+viz_individuals(
+  x = lra, 
+  extra_quali = group_names(clr),
+  color = c("#004488", "#DDAA33", "#BB5566"),
+  hull = TRUE
+)
 
 viz_variables(lra)
 ```
@@ -324,6 +330,15 @@ of Statistics and Its Application* 8 (1): 271–99.
 Greenacre, Michael J. 2019. *Compositional Data Analysis in Practice*.
 Chapman & Hall/CRC Interdisciplinary Statistics. Boca Raton: CRC Press,
 Taylor & Francis Group.
+
+</div>
+
+<div id="ref-greenacre2024" class="csl-entry">
+
+Greenacre, Michael, and Jonathan R. Wood. 2024. “A Comprehensive
+Workflow for Compositional Data Analysis in Archaeometry, with Code in
+R.” *Archaeological and Anthropological Sciences* 16 (10): 171.
+<https://doi.org/10.1007/s12520-024-02070-w>.
 
 </div>
 
