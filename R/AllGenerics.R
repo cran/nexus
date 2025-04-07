@@ -423,9 +423,7 @@ setGeneric(
 #'
 #' Divides a compositional matrix by groups.
 #' @param object,x A [`CompositionMatrix-class`] object.
-#' @param by A `vector` or a list of grouping elements, each as long as the
-#'  variables in `object` (see [group()]).
-#' @param f A 'factor' in the sense that [`as.factor(f)`][as.factor()] defines
+#' @param f A `factor` in the sense that [`as.factor(f)`][as.factor()] defines
 #'  the grouping, or a list of such factors in which case their interaction is
 #'  used for the grouping (see [base::split()]).
 #' @param drop A [`logical`] scalar: should levels that do not occur be dropped?
@@ -454,10 +452,10 @@ setGeneric(
 #' @author N. Frerebeau
 #' @docType methods
 #' @family grouping methods
-#' @aliases group_extract-method
+#' @aliases group_subset-method
 setGeneric(
-  name = "group_extract",
-  def = function(object, ...) standardGeneric("group_extract")
+  name = "group_subset",
+  def = function(object, ...) standardGeneric("group_subset")
 )
 
 # Tools ========================================================================
@@ -797,7 +795,8 @@ NULL
 #' Compositional Mean
 #'
 #' @param x A [`CompositionMatrix-class`] object.
-#' @param ... Further arguments to be passed to internal methods.
+#' @inheritParams gmean
+#' @param ... Currently not used.
 #' @details
 #'  Closed vector of the columns geometric means.
 #' @return A [`numeric`] vector.
@@ -839,9 +838,10 @@ NULL
 #' @param x A [`CompositionMatrix-class`] object.
 #' @param by A `vector` or a list of grouping elements, each as long as the
 #'  variables in `x` (see [group()]).
+#' @inheritParams gmean
 #' @param verbose A [`logical`] scalar: should \R report extra information
 #'  on progress?
-#' @param ... Further arguments to be passed to [mean()].
+#' @param ... Currently not used.
 #' @return A [`CompositionMatrix-class`] object.
 #' @seealso [mean()], [aggregate()]
 #' @example inst/examples/ex-condense.R
@@ -1131,6 +1131,7 @@ NULL
 #'  used for the ordering of the data.
 #' @param decreasing A [`logical`] scalar: should the sort order of rows be
 #'  increasing or decreasing?
+#' @param names A [`logical`] scalar: should row names be displayed?
 #' @param space A length-one [`numeric`] vector giving the the amount of space
 #'  (as a fraction of the width of a bar) left between each bar
 #'  (defaults to \eqn{0.2}).

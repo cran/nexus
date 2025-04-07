@@ -1,3 +1,5 @@
+Sys.setenv(LANGUAGE = "en") # Force locale
+
 data("slides")
 coda <- as_composition(slides)
 
@@ -36,5 +38,5 @@ Y2 <- as_composition(X2)
 by <- c("A", "A", "A", "A", "B", "B", "B", "B", "C")
 expect_equal(
   condense(Y1, by = by),
-  condense(Y2, by = by, na.rm = TRUE)
+  condense(Y2, by = by, ignore_na = TRUE)
 )

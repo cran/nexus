@@ -2,27 +2,38 @@
 #' @include AllGenerics.R
 NULL
 
-#' @export
-#' @rdname group_extract
-#' @aliases group_extract,GroupedComposition-method
-setMethod(
-  f = "group_extract",
-  signature = c("GroupedComposition"),
-  definition = function(object, which) {
-    ## Validation
-    arkhe::assert_type(which, "character")
-    if (!any_assigned(object)) stop("No group is defined.", call. = FALSE)
+.group_extract <- function(object, which) {
+  ## Validation
+  arkhe::assert_type(which, "character")
+  if (!any_assigned(object)) stop("No group is defined.", call. = FALSE)
 
-    ok <- group_names(object) %in% which
-    if (!any(ok)) {
-      msg <- ngettext(length(which), "No sample belongs to the group: %s.",
-                      "No sample belongs to the groups: %s.")
-      message(sprintf(msg, paste0(dQuote(which), collapse = ", ")))
-      return(object)
-    }
-
-    object[ok, , drop = FALSE]
+  ok <- group_names(object) %in% which
+  if (!any(ok)) {
+    msg <- ngettext(length(which), "No sample belongs to the group: %s.",
+                    "No sample belongs to the groups: %s.")
+    message(sprintf(msg, paste0(dQuote(which), collapse = ", ")))
+    return(object)
   }
+
+  object[ok, , drop = FALSE]
+}
+
+#' @export
+#' @rdname group_subset
+#' @aliases group_subset,GroupedComposition-method
+setMethod(
+  f = "group_subset",
+  signature = c("GroupedComposition"),
+  definition = .group_extract
+)
+
+#' @export
+#' @rdname group_subset
+#' @aliases group_subset,GroupedLogRatio-method
+setMethod(
+  f = "group_subset",
+  signature = c("GroupedLogRatio"),
+  definition = .group_extract
 )
 
 # Groups =======================================================================
@@ -58,11 +69,11 @@ setMethod(
     ## Validation
     arkhe::assert_length(by, nrow(object))
     if (nlevels(by) == 0) {
-      stop("Nothing to group by.", call. = FALSE)
+      stop(tr_("Nothing to group by."), call. = FALSE)
     }
     if (isTRUE(verbose)) {
       if (nlevels(by) == nrow(object)) {
-        message("As many groups as individuals.")
+        message(tr_("As many groups as individuals."))
       }
 
       n <- nlevels(by)

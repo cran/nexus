@@ -27,9 +27,9 @@ is_outlier(object, ...)
   object,
   reference,
   ...,
+  quantile = 0.975,
   robust = TRUE,
-  method = c("mve", "mcd"),
-  quantile = 0.975
+  method = c("mve", "mcd")
 )
 
 \S4method{is_outlier}{OutlierIndex}(object, robust = TRUE)
@@ -91,7 +91,7 @@ plot(out, type = "dotchart")
 plot(out, type = "distance")
 
 ## Detect outliers according to CJ
-ref <- group_extract(coda, "CJ")
+ref <- group_subset(coda, which = "CJ")
 out <- detect_outlier(coda, reference = ref, method = "mcd")
 plot(out, type = "dotchart")
 }

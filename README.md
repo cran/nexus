@@ -5,9 +5,8 @@
 
 <!-- badges: start -->
 
-[![R-CMD-check](https://github.com/tesselle/nexus/workflows/R-CMD-check/badge.svg)](https://github.com/tesselle/nexus/actions)
-[![codecov](https://codecov.io/gh/tesselle/nexus/graph/badge.svg?token=3xtuBXPGiF)](https://app.codecov.io/gh/tesselle/nexus)
-[![CodeFactor](https://www.codefactor.io/repository/github/tesselle/nexus/badge/main)](https://www.codefactor.io/repository/github/tesselle/nexus/overview/main)
+[![Code
+coverage](https://packages.tesselle.org/nexus/coverage/badge.svg)](https://packages.tesselle.org/nexus/coverage/)
 [![Dependencies](https://tinyverse.netlify.app/badge/nexus)](https://cran.r-project.org/package=nexus)
 
 <a href="https://tesselle.r-universe.dev/nexus"
@@ -68,7 +67,7 @@ To cite nexus in publications use:
 Frerebeau N, Philippe A (2025). *nexus: Sourcing Archaeological
 Materials by Chemical Composition*. Université Bordeaux Montaigne,
 Pessac, France. <doi:10.5281/zenodo.10225630>
-<https://doi.org/10.5281/zenodo.10225630>, R package version 0.4.0,
+<https://doi.org/10.5281/zenodo.10225630>, R package version 0.5.0,
 <https://packages.tesselle.org/nexus/>.
 
 This package is a part of the tesselle project
@@ -83,11 +82,11 @@ You can install the released version of **nexus** from
 install.packages("nexus")
 ```
 
-And the development version from [GitHub](https://github.com/) with:
+And the development version from [Codeberg](https://codeberg.org/) with:
 
 ``` r
 # install.packages("remotes")
-remotes::install_github("tesselle/nexus")
+remotes::install_git("https://codeberg.org/tesselle/nexus")
 ```
 
 ## Usage
@@ -127,7 +126,7 @@ coda <- group(coda, by = bronze$dynasty)
 major <- coda[, is_element_major(coda)]
 
 ## Compositional barplot
-barplot(major, order_rows = "Cu", border = NA, space = 0)
+barplot(major, order_rows = "Cu", names = FALSE, border = NA, space = 0)
 ```
 
 ![](man/figures/README-barplot-1.png)<!-- -->
@@ -150,6 +149,20 @@ viz_variables(lra)
 ```
 
 <img src="man/figures/README-lra-1.png" width="50%" /><img src="man/figures/README-lra-2.png" width="50%" />
+
+## Translation
+
+This package provides translations of user-facing communications, like
+messages, warnings and errors, and graphical elements (axis labels). The
+preferred language is by default taken from the locale. This can be
+overridden by setting of the environment variable `LANGUAGE` (you only
+need to do this once per session):
+
+``` r
+Sys.setenv(LANGUAGE = "<language code>")
+```
+
+Languages currently available are English (`en`) and French (`fr`).
 
 ## Contributing
 

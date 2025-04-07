@@ -1,5 +1,10 @@
 # HELPERS
 
+## https://michaelchirico.github.io/potools/articles/developers.html
+tr_ <- function(...) {
+  enc2utf8(gettext(paste0(...), domain = "R-nexus"))
+}
+
 missingORnull <- function(x) {
   missing(x) || is.null(x)
 }
@@ -55,6 +60,19 @@ label_percent <- function(x, digits = NULL, trim = FALSE) {
   y <- paste0(y, "%")
   x[i] <- y
   x
+}
+
+#' Label Chemical Formula
+#'
+#' @param x A [`character`] vector.
+#' @return A [`character`] vector.
+#' @keywords internal
+#' @noRd
+label_chemical <- function(x, digits = NULL, trim = FALSE) {
+  if (!all(is_chemical(x))) return(x)
+  x <- gsub(pattern = "([[:digit:]]+)", replacement = "[\\1]", x = x, fixed = FALSE)
+  x <- gsub(pattern = "([[:alpha:]]+)", replacement = "\"\\1\"", x = x, fixed = FALSE)
+  gsub(pattern = "]\"", replacement = "]*\"", x = x, fixed = FALSE)
 }
 
 #' Column Weights
