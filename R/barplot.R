@@ -9,8 +9,8 @@ barplot.CompositionMatrix <- function(height, ...,
                                       order_columns = FALSE, order_rows = NULL,
                                       decreasing = TRUE, names = TRUE,
                                       space = 0.2, offset = 0.025,
-                                      palette_color = palette_color_discrete(),
-                                      border = NA, axes = TRUE, legend = TRUE) {
+                                      color = NULL, border = NA,
+                                      axes = TRUE, legend = TRUE) {
   ## Validation
   if (ncol(height) < 2) {
     stop(tr_("At least two compositional parts are needed."), call. = FALSE)
@@ -21,7 +21,7 @@ barplot.CompositionMatrix <- function(height, ...,
                         order_rows = order_rows, decreasing = decreasing,
                         offset = offset)
   parts <- factor(xy$data$column, levels = colnames(height))
-  col <- palette_color(parts)
+  col <- khroma::palette_color_discrete(color)(parts)
   n <- nrow(height)
 
   ## Graphical parameters
@@ -30,7 +30,6 @@ barplot.CompositionMatrix <- function(height, ...,
   font.axis <- list(...)$font.axis %||% graphics::par("font.axis")
 
   ## Save and restore
-  mfrow <- graphics::par("mfrow")
   mar <- graphics::par("mar")
   nlines <- height2line("M", cex = cex.axis)
   mar[1] <- 3
@@ -38,8 +37,8 @@ barplot.CompositionMatrix <- function(height, ...,
   mar[3] <- nlines
   mar[4] <- nlines
 
-  old_par <- graphics::par(mfrow = mfrow, mar = mar)
-  on.exit(graphics::par(old_par))
+  old_par <- graphics::par(mar = mar)
+  on.exit(graphics::par(old_par), add = TRUE)
 
   ## Open new window
   grDevices::dev.hold()
@@ -103,7 +102,11 @@ barplot.CompositionMatrix <- function(height, ...,
 setMethod("barplot", c(height = "CompositionMatrix"), barplot.CompositionMatrix)
 
 prepare_barplot <- function(x, order_rows = NULL, order_columns = FALSE,
-                            decreasing = TRUE, offset = 0.025) {
+                            decreasing = TRUE, offset = 0.025,
+                            verbose = getOption("nexus.verbose")) {
+  ## Remove missing values
+  x <- arkhe::remove_NA(x, margin = 2, verbose = verbose)
+
   ## Relative frequencies
   n <- nrow(x)
   x <- x / rowSums(x)
@@ -149,7 +152,7 @@ prepare_barplot <- function(x, order_rows = NULL, order_columns = FALSE,
   data$y <- as.vector(n + 1 - as.numeric(row)) / n # Reverse levels order
 
   ## Offset
-  n_grp <- group_length(x)
+  n_grp <- group_n(x)
   n_spl <- group_size(x)
   offset <- rev(seq_len(n_grp)) * offset - offset
   data$y <- data$y + rep(offset, n_spl)[as.numeric(row)]

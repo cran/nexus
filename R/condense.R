@@ -10,7 +10,7 @@ setMethod(
   signature = "CompositionMatrix",
   definition = function(x, by, ignore_na = FALSE, ignore_zero = TRUE,
                         verbose = FALSE, ...) {
-    x <- group(x, by = by)
+    x <- group(x, by = by, verbose = verbose)
     y <- methods::callGeneric(x = x, ignore_na = ignore_na,
                               ignore_zero = ignore_zero, verbose = verbose, ...)
     ungroup(y)
@@ -26,7 +26,7 @@ setMethod(
   definition = function(x, by = NULL, ignore_na = FALSE, ignore_zero = TRUE,
                         verbose = FALSE, ...) {
     ## Grouping
-    grp <- group_factor(x)
+    grp <- group_factor(x, exclude = NULL)
     if (!is.null(by)) x <- group(x, by = by, verbose = verbose)
 
     ## Compute mean
@@ -37,10 +37,15 @@ setMethod(
       ignore_zero = ignore_zero,
       simplify = TRUE
     )
-    tot <- tapply(X = totals(x), INDEX = group_factor(x), FUN = mean)
+    tot <- tapply(
+      X = totals(x),
+      INDEX = group_factor(x, exclude = NULL),
+      FUN = mean
+    )
 
     z <- .CompositionMatrix(z, totals = as.numeric(tot))
-    group(z, by = flatten_chr(x = grp, by = group_factor(x)), verbose = verbose)
+    group(z, by = flatten_chr(x = grp, by = group_factor(x, exclude = NULL)),
+          verbose = verbose)
   }
 )
 

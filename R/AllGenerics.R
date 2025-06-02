@@ -232,30 +232,44 @@ NULL
 NULL
 
 ## Mutators --------------------------------------------------------------------
-#' Get or Set Parts of an Object
+#' Weights
 #'
-#' Getters and setters to retrieve or set parts of an object.
-#' @param object An object from which to get or set element(s).
-# @param value A possible value for the element(s) of `x`.
+#' Extract weights from an object.
+#' @param object An object for which the extraction of weights is meaningful.
+# @param value A possible value for the element(s) of `object`.
 #' @param ... Currently not used.
 # @example inst/examples/ex-mutators.R
 #' @author N. Frerebeau
 #' @docType methods
 #' @family mutators
-#' @name mutators
-#' @rdname mutators
+#' @name weights
+#' @rdname weights
 #' @aliases get set
+NULL
+
+#' Labels
+#'
+#' Find a suitable set of labels from an object.
+#' @param object An object from which to get the labels.
+# @param value A possible value for the element(s) of `object`.
+#' @param ... Currently not used.
+# @example inst/examples/ex-mutators.R
+#' @author N. Frerebeau
+#' @docType methods
+#' @family mutators
+#' @name labels
+#' @rdname labels
 NULL
 
 #' Row Sums
 #'
 #' Retrieves or defines the row sums (before [closure][closure()]).
 #' @param object An object from which to get or set `totals`.
-#' @param value A possible value for the `totals` of `x`.
+#' @param value A possible value for the `totals` of `object`.
 #' @return
-#'  * `totals() <- value` returns an object of the same sort as `x` with the new
-#'    row sums assigned.
-#'  * `totals()` returns the row sums of `x`.
+#'  * `totals() <- value` returns an object of the same sort as `object` with
+#'    the new row sums assigned.
+#'  * `totals()` returns the row sums of `object`.
 #' @example inst/examples/ex-coerce.R
 #' @author N. Frerebeau
 #' @docType methods
@@ -272,6 +286,7 @@ setGeneric(
   def = function(object, value) standardGeneric("totals<-")
 )
 
+## Coerce ----------------------------------------------------------------------
 #' Coerce to a Data Frame
 #'
 #' @param x An \R object (typically, a [`CompositionMatrix-class`] object).
@@ -282,8 +297,11 @@ setGeneric(
 #'  data frame are checked to ensure that they are syntactically valid variable
 #'  names and are not duplicated.
 #' @param group_var A [`character`] string specifying the name of the column to
-#'  create for group attribution.
-#' @param ... Currently not used.
+#'  create for group attribution (only used if `x` is [grouped][group()]).
+#' @param group_after An [`integer`] specifying a subscript, after which the new
+#'  `group_var` column is to be appended (only used if `x` is [grouped][group()]).
+#' @param ... Further parameters to be passed to
+#'  [`as.data.frame()`][base::as.data.frame].
 #' @return
 #'  A [`data.frame`].
 #' @example inst/examples/ex-coerce.R
@@ -311,7 +329,7 @@ NULL
 NULL
 
 # Groups =======================================================================
-#' Working With Groups
+#' Group by One or More Variables
 #'
 #' Define or remove the (reference) groups to which the observations belong.
 #' @param object An \R object (typically, a [`CompositionMatrix-class`] object).
@@ -344,79 +362,112 @@ setGeneric(
   def = function(object, ...) standardGeneric("ungroup")
 )
 
-#' Grouping Metadata
+#' Grouped Data
 #'
 #' Retrieve the (reference) groups to which the observations belong.
 #' @param object A [grouped][group()] \R object.
+#' @return
+#'  * `is_assigned()` returns a [`logical`] vector specifying whether or
+#'    not an observation belongs to a group.
+#'  * `any_assigned()` returns an [`logical`] scalar specifying if any
+#'    observation belongs to a group.
+#'  * `all_assigned()` returns an [`logical`] scalar specifying if all
+#'    observations belong to a group.
 #' @example inst/examples/ex-group.R
 #' @author N. Frerebeau
 #' @docType methods
 #' @family grouping methods
-#' @name group_metadata
-#' @rdname group_metadata
-NULL
-
-#' @rdname group_metadata
-#' @aliases group_levels-method
-setGeneric(
-  name = "group_levels",
-  def = function(object) standardGeneric("group_levels")
-)
-
-#' @rdname group_metadata
-#' @aliases group_names-method
-setGeneric(
-  name = "group_names",
-  def = function(object) standardGeneric("group_names")
-)
-
-#' @rdname group_metadata
-#' @aliases group_rows-method
-setGeneric(
-  name = "group_rows",
-  def = function(object) standardGeneric("group_rows")
-)
-
-#' @rdname group_metadata
-#' @aliases group_length-method
-setGeneric(
-  name = "group_length",
-  def = function(object) standardGeneric("group_length")
-)
-
-#' @rdname group_metadata
-#' @aliases group_size-method
-setGeneric(
-  name = "group_size",
-  def = function(object) standardGeneric("group_size")
-)
-
-#' @rdname group_metadata
-#' @aliases group_indices-method
-setGeneric(
-  name = "group_indices",
-  def = function(object) standardGeneric("group_indices")
-)
-
-#' @rdname group_metadata
 #' @aliases is_assigned-method
 setGeneric(
   name = "is_assigned",
   def = function(object) standardGeneric("is_assigned")
 )
 
-#' @rdname group_metadata
+#' @rdname is_assigned
 #' @aliases any_assigned-method
 setGeneric(
   name = "any_assigned",
   def = function(object) standardGeneric("any_assigned")
 )
 
-#' @rdname group_metadata
+#' @rdname is_assigned
 #' @aliases any_assigned-method
 setGeneric(
   name = "all_assigned",
   def = function(object) standardGeneric("all_assigned")
+)
+
+#' Grouping Metadata
+#'
+#' Retrieve the (reference) groups to which the observations belong.
+#' @param object A [grouped][group()] \R object.
+#' @param exclude A [`character`] vector of values to be excluded when forming
+#'  the set of levels.
+#' @param ... Currently not used.
+#' @return
+#'  * `group_levels()` returns a [`character`] vector giving the group
+#'    names.
+#'  * `group_size()` returns an [`integer`] vector giving the size of each
+#'    group.
+#'  * `group_n()` gives the total number of groups.
+#'  * `group_names()` returns a [`character`] vector giving the name of
+#'    the group that each observation belongs to.
+#'  * `group_factor()` returns a [`factor`] vector giving the name of
+#'    the group that each observation belongs to.
+#'  * `group_indices()` returns an [`integer`] vector giving the group
+#'    that each value belongs to.
+#'  * `group_rows()` returns a `list` of [`integer`] vectors giving the
+#'    observation that each group contains.
+#' @example inst/examples/ex-group.R
+#' @author N. Frerebeau
+#' @docType methods
+#' @family grouping methods
+#' @aliases group_names-method
+setGeneric(
+  name = "group_names",
+  def = function(object) standardGeneric("group_names")
+)
+
+#' @rdname group_names
+#' @aliases group_levels-method
+setGeneric(
+  name = "group_levels",
+  def = function(object) standardGeneric("group_levels")
+)
+
+#' @rdname group_names
+#' @aliases group_factor-method
+setGeneric(
+  name = "group_factor",
+  def = function(object, ...) standardGeneric("group_factor")
+)
+
+#' @rdname group_names
+#' @aliases group_rows-method
+setGeneric(
+  name = "group_rows",
+  def = function(object) standardGeneric("group_rows")
+)
+
+#' @rdname group_names
+#' @aliases group_n-method
+setGeneric(
+  name = "group_n",
+  def = function(object) standardGeneric("group_n")
+)
+
+#' @rdname group_names
+#' @aliases group_size-method
+setGeneric(
+  name = "group_size",
+  def = function(object) standardGeneric("group_size")
+)
+
+#' @rdname group_names
+#' @aliases group_indices-method
+setGeneric(
+  name = "group_indices",
+  def = function(object) standardGeneric("group_indices")
 )
 
 #' Divide into Groups
@@ -1138,8 +1189,9 @@ NULL
 #' @param offset A length-one [`numeric`] vector giving the the amount of space
 #'  (as a fraction) left between groups (defaults to \eqn{0.025}). Only used if
 #'  `groups` is not `NULL`.
-#' @param palette_color A palette [`function`] that when called with a single
-#'  argument returns a `character` vector of colors.
+#' @param color A (named) vector of colors (will be mapped to the group names
+#'  of `object`) or a [`function`] that when called with a single argument (an
+#'  integer specifying the number of colors) returns a vector of colors.
 #' @param border The color to draw the borders.
 #' @param axes A [`logical`] scalar: should axes be drawn on the plot?
 #' @param legend A [`logical`] scalar: should the legend be displayed?
@@ -1198,10 +1250,11 @@ NULL
 #'
 #' Displays a matrix of ternary plots.
 #' @param x A [`CompositionMatrix-class`] object.
-#' @param palette_color A palette [`function`] that when called with a single
-#'  argument returns a `character` vector of colors.
-#' @param palette_symbol A palette [`function`] that when called with a single
-#'  argument returns a vector of symbols.
+#' @param color A (named) vector of colors (will be mapped to the group names
+#'  of `object`) or a [`function`] that when called with a single argument (an
+#'  integer specifying the number of colors) returns a vector of colors.
+#' @param symbol A (named) vector of colors (will be mapped to the group names
+#'  of `object`).
 #' @inheritParams isopleuros::ternary_pairs
 #' @return
 #'  `plot()` is called for its side-effects: is results in a graphic being
@@ -1215,19 +1268,18 @@ NULL
 #' @rdname pairs
 NULL
 
-## Density ---------------------------------------------------------------------
+## Scatter plot ----------------------------------------------------------------
 #' Plot Log-Ratios
 #'
 #' Displays a scatter plot.
 #' @param x A [`LogRatio-class`] object.
-#' @param factor,amount A length-one [`numeric`] vector specifying the amount of
-#'  jitter (see [jitter()]).
-#' @param palette_color A palette [`function`] that when called with a single
-#'  argument returns a `character` vector of colors (only used if `x`
-#'  [is grouped][group()]).
-#' @param palette_symbol A palette [`function`] that when called with a single
-#'  argument returns a vector of symbols (only used if `x`
-#'  [is grouped][group()]).
+#' @param jitter_factor,jitter_amount A length-one [`numeric`] vector specifying
+#'  the amount of jitter (see [jitter()]).
+#' @param color A (named) vector of colors (will be mapped to the group names
+#'  of `object`) or a [`function`] that when called with a single argument (an
+#'  integer specifying the number of colors) returns a vector of colors.
+#' @param symbol A (named) vector of colors (will be mapped to the group names
+#'  of `object`).
 #' @param xlab,ylab A [`character`] vector giving the x and y axis labels.
 #' @param main A [`character`] string giving a main title for the plot.
 #' @param sub A [`character`] string giving a subtitle for the plot.
@@ -1249,6 +1301,48 @@ NULL
 #' @family plot methods
 #' @name plot
 #' @rdname plot
+NULL
+
+## Boxplot ---------------------------------------------------------------------
+#' Boxplot of Log-Ratios
+#'
+#' Displays box-and-whisker plots of the given (grouped) values.
+#' @param x A [`LogRatio-class`] object.
+#' @param range A length-one [`numeric`] vector specifying how far the plot
+#'  whiskers extend out from the box (see [graphics::boxplot()]).
+#' @param width A [`numeric`] vector giving the relative widths of the boxes
+#'  making up the plot.
+#' @param varwidth A [`logical`] scalar: should the boxes be drawn with widths
+#'  proportional to the square-roots of the number of observations in the
+#'  groups?
+#' @param notch A [`logical`] scalar: should a notch be drawn in each side of
+#'  the boxes?
+#' @param outline A [`logical`] scalar: should the outliers be drawn?
+#' @param plot A [`logical`] scalar: should a boxplot be produced? If `FALSE`,
+#'  the summaries which the boxplots are based on are invisibly returned.
+#' @param horizontal A [`logical`] scalar: should the boxplots be horizontal?
+#' @param color A (named) vector of colors (will be mapped to the group names
+#'  of `object`) or a [`function`] that when called with a single argument (an
+#'  integer specifying the number of colors) returns a vector of colors.
+#' @param xlab,ylab A [`character`] vector giving the x and y axis labels.
+#' @param main A [`character`] string giving a main title for the plot.
+#' @param sub A [`character`] string giving a subtitle for the plot.
+#' @param ann A [`logical`] scalar: should the default annotation (title and x
+#'  and y axis labels) appear on the plot?
+#' @param legend A [`list`] of additional arguments to be passed to
+#'  [graphics::legend()]; names of the list are used as argument names.
+#'  If `NULL`, no legend is displayed.
+#' @param ... Further graphical parameters.
+#' @return
+#'  `boxplot()` is called for its side-effects: is results in a graphic being
+#'  displayed (invisibly return `x`).
+#' @seealso [graphics::boxplot()]
+#' @example inst/examples/ex-boxplot.R
+#' @author N. Frerebeau
+#' @docType methods
+#' @family plot methods
+#' @name boxplot
+#' @rdname boxplot
 NULL
 
 ## Graph -----------------------------------------------------------------------
